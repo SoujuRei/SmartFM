@@ -6,7 +6,11 @@ class OrderManager:
     def __init__(self):
         self.order_dao = OrderDAO()
 
-    def create_order(self, customer_id: str, items: list[Cargo]) -> dict:
+    def create_order(
+    self,
+    customer_id: str,
+    items: list[Cargo]
+) -> Order:
         order = Order(customer_id=customer_id, items=items)
         order.calculate_cost()
         

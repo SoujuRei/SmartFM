@@ -1,27 +1,41 @@
-from pydantic import BaseModel
-from typing import List, Optional
 from datetime import datetime
+from typing import List, Optional
+from pydantic import BaseModel, Field, field_validator
 from .enums import OrderStatus
 
+
 class Cargo(BaseModel):
-    weight: float
+    cargo_id: Optional[str] = None
+    weight: float = Field(gt=0)
     dimensions: str
-    type: str
+    type: str = Field(min_length=1)
+
+    @field_validator("dimensions")
+    @classmethod
+    def dimensions_format(cls, v: str) -> str:
+        parts = v.split("x")
+        if len(parts) != 3:
+            raise ValueError("dimensions must be 'LxWxH', e.g. '10x5x2'")
+        try:
+            l, w, h = (float(p) for p in parts)
+        except ValueError:
+            raise ValueError("dimensions must contain three numbers, e.g. '10x5x2'")
+        if l <= 0 or w <= 0 or h <= 0:
+            raise ValueError("dimensions must all be positive")
+        return v
 
     def calculate_volume(self) -> float:
-        try:
-            l, w, h = map(float, self.dimensions.split('x'))
-            return l * w * h
-        except:
-            return 1.0 # fallback
+        l, w, h = (float(p) for p in self.dimensions.split("x"))
+        return l * w * h
+
 
 class Order(BaseModel):
     order_id: Optional[str] = None
-    customer_id: str
-    order_date: datetime = datetime.now()
+    customer_id: str = Field(min_length=1)
+    order_date: datetime = Field(default_factory=datetime.now)
     status: OrderStatus = OrderStatus.PENDING
     total_amount: float = 0.0
-    items: List[Cargo] = []
+    items: List[Cargo] = Field(min_length=1)
 
     def calculate_cost(self) -> float:
         base_rate = 15.5

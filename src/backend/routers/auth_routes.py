@@ -23,6 +23,21 @@ def get_user_dao() -> UserDAO:
 def login(req: LoginRequest, user_dao: UserDAO = Depends(get_user_dao)):
     try:
         user = user_dao.get_user_by_email(req.email)
+# Debug user credential for verification 
+#         print(user)
+#         print(req.password)
+#         if user is not None:
+#             print(user.password_hash.get_secret_value())
+#         print("Input:", req.password)
+#         print("Stored:", user.password_hash.get_secret_value())
+
+#         print(
+#     "Verify:",
+#     verify_password(
+#         req.password,
+#         user.password_hash.get_secret_value(),
+#     ),
+# )   
     except DatabaseConnectionError as exc:
         logger.error("Login lookup failed: %s", exc)
         raise HTTPException(
@@ -43,14 +58,14 @@ def login(req: LoginRequest, user_dao: UserDAO = Depends(get_user_dao)):
 
     return LoginResponse(
         message="Login successful",
-        access_token=access_token,
+        accessToken=access_token,
         user=LoginUser(
             id=user_id,
             name=user.name,
             email=user.email,
             role=user.role.value,
         ),
-        user_id=user_id,
+        userId=user_id,
         role=user.role.value,
         name=user.name,
     )

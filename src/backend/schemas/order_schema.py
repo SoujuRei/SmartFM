@@ -1,25 +1,88 @@
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, Field
+from typing import List
+
+class CargoDimensionsResponse(BaseModel):
+    lengthCm: float
+    widthCm: float
+    heightCm: float
 
 
-class CargoItemRequest(BaseModel):
-    weight: float = Field(gt=0)
-    dimensions: str
-    type: str = Field(min_length=1)
-
-
-class CreateOrderRequest(BaseModel):
-    customer_id: str = Field(min_length=1)
-    items: List[CargoItemRequest] = Field(min_length=1)
+class CargoItemResponse(BaseModel):
+    cargoId: str | None = None
+    weightKg: float
+    dimensions: CargoDimensionsResponse
+    cargoType: str
 
 
 class OrderResponse(BaseModel):
-    order_id: str
-    customer_id: str
+    orderId: str
+    customerId: str
     status: str
-    total_amount: float
+    origin: str | None = None
+    destination: str | None = None
+    distanceKm: float | None = None
+    totalAmount: float
+    totalWeightKg: float | None = None
+    paymentMethod: str | None = None
+    isPaid: bool | None = None
+    cargoItems: List[CargoItemResponse] = Field(default_factory=list)
+
+    model_config = {"populate_by_name": True}
+
+
+class ActionResponse(BaseModel):
+    message: str
+
+    model_config = {"populate_by_name": True}
+
+
+class CargoDimensionsRequest(BaseModel):
+    lengthCm: float
+    widthCm: float
+    heightCm: float
+
+    model_config = {
+        "populate_by_name": True
+    }
+
+
+class CargoItemRequest(BaseModel):
+    description: str | None = None
+    cargoType: str = Field(min_length=1)
+    weightKg: float = Field(gt=0)
+    dimensions: CargoDimensionsRequest
+
+    model_config = {
+        "populate_by_name": True
+    }
+
+    def to_domain(self):
+        from models.order import Cargo
+
+        return Cargo(
+            weight=self.weightKg,
+            dimensions=f"{self.dimensions.lengthCm}x{self.dimensions.widthCm}x{self.dimensions.heightCm}",
+            type=self.cargoType,
+        )
+
+class CreateOrderRequest(BaseModel):
+    customerId: str = Field(min_length=1)
+    cargoItems: List[CargoItemRequest] = Field(min_length=1)
+
+    origin: str | None = None
+    destination: str | None = None
+    distanceKm: float | None = Field(default=None, ge=0)
+    paymentMethod: str | None = None
+
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 class PaymentResponse(BaseModel):
     message: str
-    order_id: str
+    orderId: str
+    invoicePaid: bool
+
+    model_config = {"populate_by_name": True}

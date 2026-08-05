@@ -8,11 +8,11 @@ export enum UserRole {
 
 // ─── Order Status ──────────────────────────────────────────────────────────────
 export enum OrderStatus {
-  PENDING = 'PENDING',
-  PROCESSING = 'PROCESSING',
-  DISPATCHED = 'DISPATCHED',
-  DELIVERED = 'DELIVERED',
-  CANCELLED = 'CANCELLED',
+  PENDING = "PENDING",
+  PROCESSING = "PROCESSING",
+  SHIPPED = "SHIPPED",
+  DELIVERED = "DELIVERED",
+  CANCELLED = "CANCELLED",
 }
 
 // ─── Shipment Status ───────────────────────────────────────────────────────────
@@ -61,8 +61,8 @@ export const ORDER_STATUS_META: Record<OrderStatus, StatusMeta> = {
     label: 'Processing',
     className: 'border-[#046E8F] text-[#4B7084]',
   },
-  [OrderStatus.DISPATCHED]: {
-    label: 'Dispatched',
+  [OrderStatus.SHIPPED]: {
+    label: 'Shipped',
     className: 'border-[#0090C1] text-[#022F40]',
   },
   [OrderStatus.DELIVERED]: {

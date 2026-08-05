@@ -2,6 +2,7 @@
 Implementation Repository for SmartFM system designed by Group 4 for SWE30003.
 
 
+<<<<<<< Updated upstream
 # SmartFM - Smart Fleet Management System (Frontend)
 
 This repository contains the Frontend application for SmartFM (Smart Fleet Management System), an enterprise-grade logistics and fleet coordination platform built for ABC-Trans. 
@@ -52,3 +53,14 @@ Ensure you have the following installed on your local environment:
 * Node.js: v18.x or higher[cite: 1]
 * Package Manager: npm (v9+) or yarn / pnpm
 
+=======
+## How to run:
+
+Please run the backend and frontend separately, but in tandem through localhost. 
+The extensive guide can be found in their respective folders, but here's some quick commands in case everything is setup just fine:
+
+
+- Frontend: npm run dev
+
+- Backend: uvicorn main:app --reload 
+>>>>>>> Stashed changes

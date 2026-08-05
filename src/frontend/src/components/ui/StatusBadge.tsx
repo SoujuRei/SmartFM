@@ -9,8 +9,13 @@ interface ShipmentStatusBadgeProps {
   status: ShipmentStatus;
 }
 
+const UNKNOWN_STATUS_META = {
+  label: 'Unknown',
+  className: 'border-[#B7D9E5] text-[#4B7084]',
+};
+
 export function OrderStatusBadge({ status }: OrderStatusBadgeProps) {
-  const meta = ORDER_STATUS_META[status];
+  const meta = ORDER_STATUS_META[status] ?? UNKNOWN_STATUS_META;
   return (
     <span
       className={[
@@ -26,7 +31,7 @@ export function OrderStatusBadge({ status }: OrderStatusBadgeProps) {
 }
 
 export function ShipmentStatusBadge({ status }: ShipmentStatusBadgeProps) {
-  const meta = SHIPMENT_STATUS_META[status];
+  const meta = SHIPMENT_STATUS_META[status] ?? UNKNOWN_STATUS_META;
   return (
     <span
       className={[

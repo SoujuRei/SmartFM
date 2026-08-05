@@ -3,7 +3,9 @@ from pydantic import BaseModel
  
  
 class VehicleResponse(BaseModel):
-    vehicle_id: str
+    vehicleId: str
     registration: str
-    capacity_weight: float
-    is_available: bool
+    capacityWeight: float
+    isAvailable: bool
+
+    model_config = {"populate_by_name": True}

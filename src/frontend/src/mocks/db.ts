@@ -64,6 +64,7 @@ export interface Order {
   customerId: string;
   origin: string;
   destination: string;
+  distanceKm: number;
   cargoItems: CargoItem[];
   totalWeightKg: number;
   paymentMethod: PaymentMethod;
@@ -82,8 +83,22 @@ function totalWeight(items: CargoItem[]) {
   return items.reduce((sum, item) => sum + item.weightKg, 0);
 }
 
-function orderTotal(weightKg: number) {
-  return parseFloat((weightKg * 3.5 + 50).toFixed(2));
+function totalVolume(items: CargoItem[]) {
+  return items.reduce((sum, item) => sum + item.dimensions.lengthCm * item.dimensions.widthCm * item.dimensions.heightCm, 0);
+}
+
+function chargeableWeight(items: CargoItem[]) {
+  const weight = totalWeight(items);
+  const volumetricWeight = totalVolume(items) / 5000;
+  return Math.max(weight, volumetricWeight);
+}
+
+function orderTotal(items: CargoItem[], distanceKm = 0) {
+  const chargeable = chargeableWeight(items);
+  const baseRate = 10.0;
+  const pricePerKg = 8.0;
+  const distanceFactor = 1 + distanceKm / 10000;
+  return parseFloat(((baseRate + chargeable * pricePerKg) * distanceFactor + 5.0).toFixed(2));
 }
 
 const ord1Cargo = [cargo('cgi-001', 'Retail cartons', CargoType.STANDARD, 50, { lengthCm: 60, widthCm: 45, heightCm: 40 })];
@@ -99,14 +114,14 @@ const ord8Cargo = [
 ];
 
 export let orders: Order[] = [
-  { id: 'ord-001', customerId: 'usr-001', origin: 'Melbourne, VIC', destination: 'Sydney, NSW', cargoItems: ord1Cargo, totalWeightKg: totalWeight(ord1Cargo), paymentMethod: PaymentMethod.CREDIT_CARD, status: OrderStatus.DISPATCHED, totalAmount: 285.00, isPaid: true, createdAt: '2026-07-28T08:00:00Z', updatedAt: '2026-07-30T10:00:00Z' },
-  { id: 'ord-002', customerId: 'usr-001', origin: 'Sydney, NSW', destination: 'Brisbane, QLD', cargoItems: ord2Cargo, totalWeightKg: totalWeight(ord2Cargo), paymentMethod: PaymentMethod.BANK_TRANSFER, status: OrderStatus.DELIVERED, totalAmount: 195.50, isPaid: true, createdAt: '2026-07-20T09:00:00Z', updatedAt: '2026-07-24T14:00:00Z' },
-  { id: 'ord-003', customerId: 'usr-001', origin: 'Melbourne, VIC', destination: 'Adelaide, SA', cargoItems: ord3Cargo, totalWeightKg: totalWeight(ord3Cargo), paymentMethod: PaymentMethod.CREDIT_CARD, status: OrderStatus.PROCESSING, totalAmount: 520.00, isPaid: true, createdAt: '2026-08-01T07:30:00Z', updatedAt: '2026-08-02T09:00:00Z' },
-  { id: 'ord-004', customerId: 'usr-001', origin: 'Perth, WA', destination: 'Melbourne, VIC', cargoItems: ord4Cargo, totalWeightKg: totalWeight(ord4Cargo), paymentMethod: PaymentMethod.CASH_ON_DELIVERY, status: OrderStatus.PENDING, totalAmount: 680.00, isPaid: false, createdAt: '2026-08-04T11:00:00Z', updatedAt: '2026-08-04T11:00:00Z' },
-  { id: 'ord-005', customerId: 'usr-001', origin: 'Sydney, NSW', destination: 'Melbourne, VIC', cargoItems: ord5Cargo, totalWeightKg: totalWeight(ord5Cargo), paymentMethod: PaymentMethod.CREDIT_CARD, status: OrderStatus.DISPATCHED, totalAmount: 175.00, isPaid: true, createdAt: '2026-08-03T13:00:00Z', updatedAt: '2026-08-04T08:00:00Z' },
-  { id: 'ord-006', customerId: 'usr-001', origin: 'Brisbane, QLD', destination: 'Gold Coast, QLD', cargoItems: ord6Cargo, totalWeightKg: totalWeight(ord6Cargo), paymentMethod: PaymentMethod.BANK_TRANSFER, status: OrderStatus.CANCELLED, totalAmount: 95.00, isPaid: false, createdAt: '2026-07-15T10:00:00Z', updatedAt: '2026-07-15T14:00:00Z' },
-  { id: 'ord-007', customerId: 'usr-001', origin: 'Canberra, ACT', destination: 'Sydney, NSW', cargoItems: ord7Cargo, totalWeightKg: totalWeight(ord7Cargo), paymentMethod: PaymentMethod.CREDIT_CARD, status: OrderStatus.PROCESSING, totalAmount: 245.00, isPaid: true, createdAt: '2026-08-04T14:00:00Z', updatedAt: '2026-08-04T14:00:00Z' },
-  { id: 'ord-008', customerId: 'usr-001', origin: 'Darwin, NT', destination: 'Adelaide, SA', cargoItems: ord8Cargo, totalWeightKg: totalWeight(ord8Cargo), paymentMethod: PaymentMethod.BANK_TRANSFER, status: OrderStatus.PROCESSING, totalAmount: 1200.00, isPaid: true, createdAt: '2026-08-05T06:00:00Z', updatedAt: '2026-08-05T06:00:00Z' },
+  { id: 'ord-001', customerId: 'usr-001', origin: 'Melbourne, VIC', destination: 'Sydney, NSW', distanceKm: 880, cargoItems: ord1Cargo, totalWeightKg: totalWeight(ord1Cargo), paymentMethod: PaymentMethod.CREDIT_CARD, status: OrderStatus.DISPATCHED, totalAmount: orderTotal(ord1Cargo, 880), isPaid: true, createdAt: '2026-07-28T08:00:00Z', updatedAt: '2026-07-30T10:00:00Z' },
+  { id: 'ord-002', customerId: 'usr-001', origin: 'Sydney, NSW', destination: 'Brisbane, QLD', distanceKm: 920, cargoItems: ord2Cargo, totalWeightKg: totalWeight(ord2Cargo), paymentMethod: PaymentMethod.BANK_TRANSFER, status: OrderStatus.DELIVERED, totalAmount: orderTotal(ord2Cargo, 920), isPaid: true, createdAt: '2026-07-20T09:00:00Z', updatedAt: '2026-07-24T14:00:00Z' },
+  { id: 'ord-003', customerId: 'usr-001', origin: 'Melbourne, VIC', destination: 'Adelaide, SA', distanceKm: 725, cargoItems: ord3Cargo, totalWeightKg: totalWeight(ord3Cargo), paymentMethod: PaymentMethod.CREDIT_CARD, status: OrderStatus.PROCESSING, totalAmount: orderTotal(ord3Cargo, 725), isPaid: true, createdAt: '2026-08-01T07:30:00Z', updatedAt: '2026-08-02T09:00:00Z' },
+  { id: 'ord-004', customerId: 'usr-001', origin: 'Perth, WA', destination: 'Melbourne, VIC', distanceKm: 3400, cargoItems: ord4Cargo, totalWeightKg: totalWeight(ord4Cargo), paymentMethod: PaymentMethod.CASH_ON_DELIVERY, status: OrderStatus.PENDING, totalAmount: orderTotal(ord4Cargo, 3400), isPaid: false, createdAt: '2026-08-04T11:00:00Z', updatedAt: '2026-08-04T11:00:00Z' },
+  { id: 'ord-005', customerId: 'usr-001', origin: 'Sydney, NSW', destination: 'Melbourne, VIC', distanceKm: 880, cargoItems: ord5Cargo, totalWeightKg: totalWeight(ord5Cargo), paymentMethod: PaymentMethod.CREDIT_CARD, status: OrderStatus.DISPATCHED, totalAmount: orderTotal(ord5Cargo, 880), isPaid: true, createdAt: '2026-08-03T13:00:00Z', updatedAt: '2026-08-04T08:00:00Z' },
+  { id: 'ord-006', customerId: 'usr-001', origin: 'Brisbane, QLD', destination: 'Gold Coast, QLD', distanceKm: 80, cargoItems: ord6Cargo, totalWeightKg: totalWeight(ord6Cargo), paymentMethod: PaymentMethod.BANK_TRANSFER, status: OrderStatus.CANCELLED, totalAmount: orderTotal(ord6Cargo, 80), isPaid: false, createdAt: '2026-07-15T10:00:00Z', updatedAt: '2026-07-15T14:00:00Z' },
+  { id: 'ord-007', customerId: 'usr-001', origin: 'Canberra, ACT', destination: 'Sydney, NSW', distanceKm: 290, cargoItems: ord7Cargo, totalWeightKg: totalWeight(ord7Cargo), paymentMethod: PaymentMethod.CREDIT_CARD, status: OrderStatus.PROCESSING, totalAmount: orderTotal(ord7Cargo, 290), isPaid: true, createdAt: '2026-08-04T14:00:00Z', updatedAt: '2026-08-04T14:00:00Z' },
+  { id: 'ord-008', customerId: 'usr-001', origin: 'Darwin, NT', destination: 'Adelaide, SA', distanceKm: 3000, cargoItems: ord8Cargo, totalWeightKg: totalWeight(ord8Cargo), paymentMethod: PaymentMethod.BANK_TRANSFER, status: OrderStatus.PROCESSING, totalAmount: orderTotal(ord8Cargo, 3000), isPaid: true, createdAt: '2026-08-05T06:00:00Z', updatedAt: '2026-08-05T06:00:00Z' },
 ];
 
 export interface Shipment {
@@ -160,9 +175,9 @@ export let payments: Payment[] = [
 ];
 
 export function getCustomerName(customerId: string) {
-  return users.find(user => user.id === customerId)?.name ?? 'Unknown customer';
+  return users.find(user => user.id === customerId)?.name ?? customerId;
 }
 
-export function calculateOrderTotal(weightKg: number) {
-  return orderTotal(weightKg);
+export function calculateOrderTotal(items: CargoItem[], distanceKm = 0) {
+  return orderTotal(items, distanceKm);
 }

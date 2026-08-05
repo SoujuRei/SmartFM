@@ -63,11 +63,11 @@ export function StaffDashboardPage() {
                         </div>
                         <p className="text-sm font-semibold text-[#183446]">{order.origin} to {order.destination}</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-xs text-[#4B7084]">
-                          <p>Customer: <span className="font-medium text-[#183446]">{getCustomerName(order.customerId)}</span></p>
-                          <p>Weight: <span className="font-medium text-[#183446]">{order.totalWeightKg}kg</span></p>
+                          <p>Customer: <span className="font-medium text-[#183446]">{getCustomerName(order.customerId) || order.customerId}</span></p>
+                          <p>Weight: <span className="font-medium text-[#183446]">{order.totalWeightKg ?? 0}kg</span></p>
                           <p>Cargo: <span className="font-medium text-[#183446]">{order.cargoItems.map(item => CARGO_TYPE_LABELS[item.cargoType]).join(', ')}</span></p>
                           <p>Dimensions: <span className="font-medium text-[#183446]">{dimensions(order)}</span></p>
-                          <p>Payment: <span className="font-medium text-[#183446]">{PAYMENT_METHOD_LABELS[order.paymentMethod]}</span></p>
+                          <p>Payment: <span className="font-medium text-[#183446]">{PAYMENT_METHOD_LABELS[order.paymentMethod] ?? 'Unknown'}</span></p>
                           <p>Total: <span className="font-medium text-[#183446]">{formatCurrency(order.totalAmount)}</span></p>
                         </div>
                       </div>
@@ -93,13 +93,13 @@ export function StaffDashboardPage() {
             ) : (
               <ul className="space-y-3">
                 {activeShipments.map((shipment: any) => (
-                  <li key={shipment.id} className="p-4 rounded-md border border-[#B7D9E5] bg-[#ffffff]">
+                  <li key={shipment.id ?? shipment.shipmentId} className="p-4 rounded-md border border-[#B7D9E5] bg-[#ffffff]">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                       <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-3">
-                          <span className="font-mono text-xs font-semibold text-[#183446]">{shipment.id.toUpperCase()}</span>
+                          <span className="font-mono text-xs font-semibold text-[#183446]">{(shipment.id ?? shipment.shipmentId ?? '').toUpperCase()}</span>
                           <StatusBadge type="shipment" status={shipment.status} />
-                          <span className="font-mono text-[11px] text-[#6A95A7]">{shipment.orderId.toUpperCase()}</span>
+                          <span className="font-mono text-[11px] text-[#6A95A7]">{(shipment.orderId ?? shipment.order?.orderId ?? '').toUpperCase()}</span>
                         </div>
                         <p className="text-sm font-semibold text-[#183446]">{shipment.order?.origin} to {shipment.order?.destination}</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-xs text-[#4B7084]">

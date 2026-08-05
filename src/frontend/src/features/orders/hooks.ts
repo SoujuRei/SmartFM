@@ -37,3 +37,26 @@ export function usePayOrder() {
     },
   });
 }
+
+export function useCancelOrder() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (orderId: string) => ordersApi.cancelOrder(orderId).then(r => r.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['orders'] });
+      qc.invalidateQueries({ queryKey: ['shipments'] });
+    },
+  });
+}
+
+export function useDeleteOrder() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (orderId: string) => ordersApi.deleteOrder(orderId).then(r => r.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['orders'] });
+      qc.invalidateQueries({ queryKey: ['shipments'] });
+    },
+  });
+}
+

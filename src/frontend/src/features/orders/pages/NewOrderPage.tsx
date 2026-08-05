@@ -24,6 +24,7 @@ const cargoSchema = z.object({
 const schema = z.object({
   origin: z.string().min(3, 'Origin must be at least 3 characters.'),
   destination: z.string().min(3, 'Destination must be at least 3 characters.'),
+  distanceKm: z.coerce.number().min(0, 'Distance must be 0 or more.'),
   cargoItems: z.array(cargoSchema).min(1, 'Add at least one cargo item.'),
   paymentMethod: z.nativeEnum(PaymentMethod, { required_error: 'Please select a payment method.' }),
 });
@@ -54,6 +55,7 @@ export function NewOrderPage() {
     defaultValues: {
       origin: '',
       destination: '',
+      distanceKm: 0,
       cargoItems: [emptyCargo],
       paymentMethod: undefined,
     },
@@ -61,8 +63,18 @@ export function NewOrderPage() {
 
   const { fields, append, remove } = useFieldArray({ control, name: 'cargoItems' });
   const cargoItems = watch('cargoItems') ?? [];
-  const totalWeight = cargoItems.reduce((sum, item) => sum + (Number(item.weightKg) || 0), 0);
-  const estimatedTotal = totalWeight > 0 ? totalWeight * 3.5 + 50 : 0;
+  const distanceKm = Number(watch('distanceKm') ?? 0);
+  const totalVolumeCm3 = cargoItems.reduce((sum, item) => {
+    const length = Number(item.dimensions?.lengthCm) || 0;
+    const width = Number(item.dimensions?.widthCm) || 0;
+    const height = Number(item.dimensions?.heightCm) || 0;
+    return sum + length * width * height;
+  }, 0);
+  const totalWeightKg = cargoItems.reduce((sum, item) => sum + (Number(item.weightKg) || 0), 0);
+  const volumetricWeightKg = totalVolumeCm3 / 5000;
+  const chargeableWeightKg = Math.max(totalWeightKg, volumetricWeightKg);
+  const distanceFactor = 1 + distanceKm / 10000;
+  const estimatedTotal = chargeableWeightKg > 0 ? Number(((10 + chargeableWeightKg * 8) * distanceFactor + 5).toFixed(2)) : 0;
 
   const onSubmit = async (data: FormData) => {
     if (!loggedInUser) return;
@@ -87,9 +99,10 @@ export function NewOrderPage() {
 
       <Card>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Input id="origin" label="Origin" placeholder="Melbourne, VIC" {...register('origin')} error={errors.origin?.message} />
             <Input id="destination" label="Destination" placeholder="Sydney, NSW" {...register('destination')} error={errors.destination?.message} />
+            <Input id="distanceKm" label="Distance (km)" type="number" step="0.1" min="0" {...register('distanceKm')} error={errors.distanceKm?.message} />
           </div>
 
           <div className="space-y-4 border-t border-[#B7D9E5] pt-5">

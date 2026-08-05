@@ -23,7 +23,7 @@ export function CustomerDashboardPage() {
 
   const totalOrders = orders?.length ?? 0;
   const activeOrders = orders?.filter(o =>
-    [OrderStatus.PROCESSING, OrderStatus.DISPATCHED].includes(o.status as OrderStatusType)
+    [OrderStatus.PROCESSING, OrderStatus.SHIPPED].includes(o.status as OrderStatusType)
   ).length ?? 0;
   const deliveredOrders = orders?.filter(o => o.status === OrderStatus.DELIVERED).length ?? 0;
   const pendingPayment = orders?.filter(o => o.status === OrderStatus.PENDING).length ?? 0;
@@ -129,7 +129,7 @@ export function CustomerDashboardPage() {
                             Pay Now
                           </Button>
                         )}
-                        {[OrderStatus.DISPATCHED, OrderStatus.DELIVERED].includes(
+                        {[OrderStatus.SHIPPED, OrderStatus.DELIVERED].includes(
                           order.status as OrderStatusType
                         ) && (
                           <Link to={`/customer/orders/${order.id}/tracking`}>

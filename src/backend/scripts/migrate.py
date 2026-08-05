@@ -1,63 +1,113 @@
-"""
-scripts/migrate_passwords_to_bcrypt.py
-
-One-off migration: hashes any plaintext passwords still stored in the
-`users` table. Safe to re-run -- rows that already look like a bcrypt hash
-($2b$/$2a$ prefix) are skipped, so running it twice does no harm.
-
-BEFORE RUNNING: back up the `users` table (Supabase dashboard -> Table
-Editor -> Export, or a SQL dump). "This replaces plaintext passwords in the password column with bcrypt password hashes."
-
-Run once, from the project root:
-    python -m scripts.migrate_passwords_to_bcrypt
-
-After this runs successfully and you've verified login still works, any
-NEW user-creation code path (signup, seeding, admin creation) must call
-core.security.hash_password() before inserting -- this script only fixes
-existing rows, it doesn't change how new ones are written.
-"""
-
-import logging
-
-from core.database import DatabaseConnection
-from core.security import hash_password
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+import os
+import bcrypt
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from dotenv import load_dotenv
 
 
-def _looks_hashed(password: str) -> bool:
-    return password.startswith("$2b$") or password.startswith("$2a$")
 
 
-def migrate() -> None:
-    db = DatabaseConnection().get_instance()
-    response = db.table("users").select("id", "password").execute()
-    rows = response.data or []
+DATABASE_URL = "postgresql://postgres:TnxOjdTTYYdCh3sC@db.upsxxrrajlciuhcwqbjf.supabase.co:5432/postgres"
 
-    migrated = 0
-    skipped = 0
 
-    for row in rows:
-        if _looks_hashed(row["password"]):
-            skipped += 1
-            continue
-        try:
-            new_hash = hash_password(row["password"])
-        except ValueError:
-            logger.warning(
-            "Skipping user %s: password exceeds bcrypt limit",
-            row["id"]
-            )
-        continue
-    db.table("users").update({"password": new_hash}).eq("id", row["id"]).execute()
-    migrated += 1
 
-    logger.info(
-        "Password migration complete: %d migrated, %d already hashed",
-        migrated, skipped,
+def is_bcrypt_hash(value: str) -> bool:
+    """
+    Detect existing bcrypt hashes.
+    bcrypt hashes start with:
+    $2a$
+    $2b$
+    $2y$
+    """
+    return (
+        value.startswith("$2a$")
+        or value.startswith("$2b$")
+        or value.startswith("$2y$")
     )
 
 
+def hash_password(password: str) -> str:
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(
+        password.encode("utf-8"),
+        salt
+    )
+    return hashed.decode("utf-8")
+
+
+def main():
+
+    if not DATABASE_URL:
+        raise RuntimeError(
+            "DATABASE_URL environment variable is missing"
+        )
+
+    conn = psycopg2.connect(DATABASE_URL)
+
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+
+            cur.execute(
+                """
+                SELECT id, email, password
+                FROM users
+                """
+            )
+
+            users = cur.fetchall()
+
+            updated = 0
+            skipped = 0
+
+            for user in users:
+
+                current_password = user["password"]
+
+                if is_bcrypt_hash(current_password):
+                    print(
+                        f"SKIP {user['email']} - already hashed"
+                    )
+                    skipped += 1
+                    continue
+
+
+                hashed_password = hash_password(
+                    current_password
+                )
+
+                cur.execute(
+                    """
+                    UPDATE users
+                    SET password = %s
+                    WHERE id = %s
+                    """,
+                    (
+                        hashed_password,
+                        user["id"]
+                    )
+                )
+
+                print(
+                    f"UPDATED {user['email']}"
+                )
+
+                updated += 1
+
+
+            conn.commit()
+
+            print("\nFinished")
+            print(f"Updated: {updated}")
+            print(f"Skipped: {skipped}")
+
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
+
+
 if __name__ == "__main__":
-    migrate()
+    main()

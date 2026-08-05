@@ -27,6 +27,15 @@ class Cargo(BaseModel):
     def calculate_volume(self) -> float:
         l, w, h = (float(p) for p in self.dimensions.split("x"))
         return l * w * h
+    
+    def dimensions_object(self):
+        l,w,h = self.dimensions.split("x")
+
+        return {
+            "lengthCm": float(l),
+            "widthCm": float(w),
+            "heightCm": float(h)
+        }
 
 
 class Order(BaseModel):
@@ -35,10 +44,28 @@ class Order(BaseModel):
     order_date: datetime = Field(default_factory=datetime.now)
     status: OrderStatus = OrderStatus.PENDING
     total_amount: float = 0.0
-    items: List[Cargo] = Field(min_length=1)
+    items: List[Cargo] = Field(default_factory=list)
+    origin: str | None = None
+    destination: str | None = None
+    payment_method: str | None = None
+    is_paid: bool = False
+    total_weight_kg: float = 0.0
+    distance_km: float = 0.0
 
     def calculate_cost(self) -> float:
-        base_rate = 15.5
+        total_weight = sum(item.weight for item in self.items)
         total_vol = sum(item.calculate_volume() for item in self.items)
-        self.total_amount = total_vol * base_rate
+        volumetric_weight = total_vol / 5000
+        chargeable_weight = max(total_weight, volumetric_weight)
+
+        base_rate = 10.0
+        price_per_kg = 8.0
+        distance_factor = 1 + (self.distance_km / 10000)
+
+        price = base_rate + chargeable_weight * price_per_kg
+        price *= distance_factor
+        price += 5.0
+
+        self.total_amount = round(price, 2)
+        self.total_weight_kg = total_weight
         return self.total_amount

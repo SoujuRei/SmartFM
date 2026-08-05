@@ -13,14 +13,14 @@ export function CustomerTrackingPage() {
   const { loggedInUser } = useAuth();
   const { data: orders, isLoading } = useOrders(loggedInUser?.id);
   const trackable = orders?.filter(order =>
-    [OrderStatus.DISPATCHED, OrderStatus.DELIVERED].includes(order.status),
+    [OrderStatus.SHIPPED, OrderStatus.DELIVERED].includes(order.status),
   ) ?? [];
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="font-display text-3xl font-bold text-[#183446]">Tracking</h2>
-        <p className="text-sm text-[#4B7084]">Open a dispatched order to view its live tracking timeline.</p>
+        <p className="text-sm text-[#4B7084]">Open a shipped order to view its live tracking timeline.</p>
       </div>
 
       <Card padding={false}>

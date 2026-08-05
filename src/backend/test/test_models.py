@@ -31,7 +31,7 @@ class TestCargoAndOrder(unittest.TestCase):
 class TestFleetModels(unittest.TestCase):
     def test_shipment_default_status(self):
         s = Shipment(order_id="o1", vehicle_id="v1", driver_id="d1")
-        self.assertEqual(s.status, ShipmentStatus.DISPATCHED)
+        self.assertEqual(s.status, ShipmentStatus.ASSIGNED)
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ from core.database import DatabaseConnection
 from core.exceptions import DatabaseConnectionError, NotFoundError
 from models.fleet import Shipment, TrackingRecord
 from models.enums import ShipmentStatus
+from typing import List
 
 logger = logging.getLogger(__name__)
 
@@ -21,9 +22,15 @@ class ShipmentDAO:
         self.db = DatabaseConnection().get_instance()
 
     def save_shipment(self, shipment: Shipment) -> Shipment:
-        data = shipment.model_dump(exclude={"shipment_id"})
+        data = shipment.model_dump(exclude={"shipment_id", "dispatch_date"})
         data["status"] = data["status"].value
-        data["dispatch_date"] = data["dispatch_date"].isoformat()
+        # include estimated_delivery when present
+        if data.get("estimated_delivery"):
+            try:
+                data["estimated_delivery"] = data["estimated_delivery"].isoformat()
+            except Exception:
+                # leave as-is; DB may accept string or null
+                pass
 
         try:
             response = self.db.table("shipments").insert(data).execute()
@@ -37,6 +44,176 @@ class ShipmentDAO:
             raise DatabaseConnectionError("Shipment insert returned no data")
 
         return Shipment(**response.data[0])
+
+    def get_by_order_id(self, order_id: str) -> Shipment | None:
+        try:
+            res = (
+                self.db.table("shipments")
+                .select("*")
+                .eq("order_id", order_id)
+                .execute()
+            )
+        except Exception as exc:
+            logger.exception(
+                "Failed fetching shipment for order_id=%s",
+                order_id
+            )
+            raise DatabaseConnectionError(
+                f"Shipment lookup failed: {exc}"
+            ) from exc
+
+        if not res.data:
+            return None
+
+        return Shipment(**res.data[0])
+    
+    def get_shipment_by_id(self, shipment_id: str) -> Shipment:
+        try:
+            res = (
+                self.db.table("shipments")
+                .select("*")
+                .eq("shipment_id", shipment_id)
+                .execute()
+            )
+        except Exception as exc:
+            logger.exception(
+                "Failed to fetch shipment_id=%s",
+                shipment_id
+            )
+            raise DatabaseConnectionError(
+                f"Shipment lookup failed: {exc}"
+            ) from exc
+
+        if not res.data:
+            raise NotFoundError(
+                f"Shipment {shipment_id} not found"
+            )
+
+        return Shipment(**res.data[0])
+
+
+    def list_shipments(self) -> List[Shipment]:
+        try:
+            res = (
+                self.db.table("shipments")
+                .select("*")
+                .execute()
+            )
+        except Exception as exc:
+            logger.exception(
+                "Failed to fetch shipments"
+            )
+            raise DatabaseConnectionError(
+                f"Shipment lookup failed: {exc}"
+            ) from exc
+
+        return [
+            Shipment(**row)
+            for row in res.data
+        ]
+
+
+    def get_shipments_by_driver(self, driver_id: str) -> List[Shipment]:
+        try:
+            res = (
+                self.db.table("shipments")
+                .select("*")
+                .eq("driver_id", driver_id)
+                .execute()
+            )
+        except Exception as exc:
+            logger.exception("Failed to fetch shipments for driver=%s", driver_id)
+            raise DatabaseConnectionError(
+                f"Shipment lookup failed: {exc}"
+            ) from exc
+
+        return [Shipment(**row) for row in res.data]
+
+
+    def get_tracking_history(
+        self,
+        shipment_id: str
+    ) -> List[TrackingRecord]:
+
+        try:
+            res = (
+                self.db.table("tracking_records")
+                .select("*")
+                .eq("shipment_id", shipment_id)
+                .order("timestamp")
+                .execute()
+            )
+        except Exception as exc:
+            logger.exception(
+                "Failed to fetch tracking history for shipment=%s",
+                shipment_id
+            )
+            raise DatabaseConnectionError(
+                f"Tracking lookup failed: {exc}"
+            ) from exc
+
+        return [
+            TrackingRecord(**row)
+            for row in res.data
+        ]
+
+    def get_active_shipments_by_vehicle(self, vehicle_id: str) -> List[Shipment]:
+        try:
+            res = (
+                self.db.table("shipments")
+                .select("*")
+                .eq("vehicle_id", vehicle_id)
+                .not_("status", "DELIVERED")
+                .execute()
+            )
+        except Exception as exc:
+            logger.exception("Failed fetching active shipments for vehicle=%s", vehicle_id)
+            raise DatabaseConnectionError(f"Shipment lookup failed: {exc}") from exc
+
+        return [Shipment(**row) for row in res.data]
+
+    def get_active_shipments_by_driver(self, driver_id: str) -> List[Shipment]:
+        try:
+            res = (
+                self.db.table("shipments")
+                .select("*")
+                .eq("driver_id", driver_id)
+                .not_("status", "DELIVERED")
+                .execute()
+            )
+        except Exception as exc:
+            logger.exception("Failed fetching active shipments for driver=%s", driver_id)
+            raise DatabaseConnectionError(f"Shipment lookup failed: {exc}") from exc
+
+        return [Shipment(**row) for row in res.data]
+
+    def delete_tracking_by_shipment_id(self, shipment_id: str) -> int:
+        try:
+            res = (
+                self.db.table("tracking_records")
+                .delete()
+                .eq("shipment_id", shipment_id)
+                .execute()
+            )
+        except Exception as exc:
+            logger.exception("Failed deleting tracking records for shipment=%s", shipment_id)
+            raise DatabaseConnectionError(f"Tracking delete failed: {exc}") from exc
+
+        return len(res.data)
+
+    def delete_shipment_by_order_id(self, order_id: str) -> int:
+        try:
+            res = (
+                self.db.table("shipments")
+                .delete()
+                .eq("order_id", order_id)
+                .execute()
+            )
+        except Exception as exc:
+            logger.exception("Failed deleting shipment for order=%s", order_id)
+            raise DatabaseConnectionError(f"Shipment delete failed: {exc}") from exc
+
+        return len(res.data)
 
     def update_shipment_status(self, shipment_id: str, status: ShipmentStatus) -> Shipment:
         try:

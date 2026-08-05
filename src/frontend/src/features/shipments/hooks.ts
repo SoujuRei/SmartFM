@@ -20,11 +20,12 @@ export function useShipments() {
 export function useUpdateShipmentStatus() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ shipmentId, status }: { shipmentId: string; status: ShipmentStatus }) =>
-      shipmentsApi.updateStatus(shipmentId, status).then(r => r.data),
+    mutationFn: ({ shipmentId, status, location, description }: { shipmentId: string; status: ShipmentStatus; location: string; description: string }) =>
+      shipmentsApi.updateStatus(shipmentId, status, location, description).then(r => r.data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['shipments'] });
-      qc.invalidateQueries({ queryKey: ['orders'] });
+      qc.invalidateQueries({ queryKey: ['shipments'], exact: false });
+      qc.invalidateQueries({ queryKey: ['orders'], exact: false });
+      qc.invalidateQueries({ queryKey: ['shipments', 'driver'], exact: false });
     },
   });
 }
@@ -35,8 +36,9 @@ export function useAddTracking() {
     mutationFn: ({ shipmentId, payload }: { shipmentId: string; payload: { location: string; note: string } }) =>
       shipmentsApi.addTracking(shipmentId, payload).then(r => r.data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['shipments'] });
-      qc.invalidateQueries({ queryKey: ['orders', undefined, 'tracking'] });
+      qc.invalidateQueries({ queryKey: ['shipments'], exact: false });
+      qc.invalidateQueries({ queryKey: ['orders'], exact: false });
+      qc.invalidateQueries({ queryKey: ['shipments', 'driver'], exact: false });
     },
   });
 }

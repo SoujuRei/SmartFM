@@ -2,7 +2,15 @@ import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth_routes, order_routes, fleet_routes
+from routers import (
+    auth_routes,
+    order_routes,
+    fleet_routes,
+    driver_routes,
+    shipments_routes,
+    payments_routes,
+    report_routes
+)
 
 app = FastAPI(title="SmartFM API")
 
@@ -26,6 +34,11 @@ app.add_middleware(
 app.include_router(auth_routes.router, prefix="/api")
 app.include_router(order_routes.router, prefix="/api")
 app.include_router(fleet_routes.router, prefix="/api")
+app.include_router(driver_routes.router, prefix="/api")
+app.include_router(report_routes.router,prefix="/api",)
+app.include_router(shipments_routes.router, prefix="/api")
+app.include_router(payments_routes.router, prefix="/api")
+
 
 @app.get("/")
 def health_check():

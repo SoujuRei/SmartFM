@@ -25,9 +25,9 @@ export function useDispatchShipment() {
       estimatedDelivery?: string;
     }) => fleetApi.dispatchShipment(payload).then(r => r.data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['orders'] });
-      qc.invalidateQueries({ queryKey: ['vehicles'] });
-      qc.invalidateQueries({ queryKey: ['shipments'] });
+      qc.invalidateQueries({ queryKey: ['orders'], exact: false });
+      qc.invalidateQueries({ queryKey: ['vehicles'], exact: false });
+      qc.invalidateQueries({ queryKey: ['shipments'], exact: false });
     },
   });
 }

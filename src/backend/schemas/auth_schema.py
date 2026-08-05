@@ -15,8 +15,10 @@ class LoginUser(BaseModel):
 
 class LoginResponse(BaseModel):
     message: str
-    access_token: str
+    accessToken: str
     user: LoginUser
-    user_id: str
+    userId: str
     role: str
     name: str
+
+    model_config = {"populate_by_name": True}

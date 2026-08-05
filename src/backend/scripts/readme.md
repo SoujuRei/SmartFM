@@ -5,3 +5,5 @@
 1. Go to backend/
 2. Ensure requirements.txt is properly pip installed
 3. python -m scripts.migrate
+
+

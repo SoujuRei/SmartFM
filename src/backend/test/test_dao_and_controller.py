@@ -64,7 +64,7 @@ class TestVehicleDAO(unittest.TestCase):
 class TestShipmentDAO(unittest.TestCase):
     def test_save_shipment_success(self):
         fake_db = MagicMock()
-        saved = {"shipment_id":"s1","order_id":"o1","vehicle_id":"v1","driver_id":"d1","status":"DISPATCHED","dispatch_date":"2026-01-01T00:00:00"}
+        saved = {"shipment_id":"s1","order_id":"o1","vehicle_id":"v1","driver_id":"d1","status":"ASSIGNED","dispatch_date":"2026-01-01T00:00:00"}
         fake_db.table.return_value.insert.return_value.execute.return_value = MockResponse([saved])
         with patch('daos.shipment_dao.DatabaseConnection') as DC:
             DC.return_value.get_instance.return_value = fake_db

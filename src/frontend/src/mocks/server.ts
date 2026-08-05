@@ -45,22 +45,46 @@ export function startMockServer() {
       id: `cgi-${String(Date.now()).slice(-5)}-${index + 1}`,
     }));
     const totalWeightKg = cargoItems.reduce((sum: number, item: CargoItem) => sum + Number(item.weightKg), 0);
+    const distanceKm = Number(data.distanceKm ?? 0);
     const newOrder: Order = {
       id: `ord-${String(orders.length + 1).padStart(3, '0')}`,
       customerId: data.customerId,
       origin: data.origin,
       destination: data.destination,
+      distanceKm,
       cargoItems,
       totalWeightKg,
       paymentMethod: data.paymentMethod,
       status: OrderStatus.PENDING,
-      totalAmount: calculateOrderTotal(totalWeightKg),
+      totalAmount: calculateOrderTotal(cargoItems, distanceKm),
       isPaid: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
     orders.push(newOrder);
     return [201, newOrder];
+  });
+
+  mock.onPost(/\/orders\/([^/]+)\/pay/).reply((config) => {
+    const orderId = config.url!.split('/')[2];
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return [404, { message: 'Order not found.' }];
+    if (order.status !== OrderStatus.PENDING) {
+      return [409, { message: 'Order is not awaiting payment.' }];
+    }
+    const newPayment: Payment = {
+      id: `pay-${String(payments.length + 1).padStart(3, '0')}`,
+      orderId: order.id,
+      amount: order.totalAmount,
+      method: order.paymentMethod,
+      status: 'PAID',
+      paidAt: new Date().toISOString(),
+    };
+    payments.push(newPayment);
+    order.isPaid = true;
+    order.status = OrderStatus.PROCESSING;
+    order.updatedAt = new Date().toISOString();
+    return [200, newPayment];
   });
 
   mock.onGet(/\/orders\/([^/]+)$/).reply((config) => {
@@ -102,7 +126,7 @@ export function startMockServer() {
     return [201, newPayment];
   });
 
-  mock.onGet('/vehicles/available').reply((config) => {
+  mock.onGet('/fleet/vehicles/available').reply((config) => {
     const minCapacity = parseFloat(config.params?.minCapacity ?? '0');
     return [200, vehicles.filter(v => v.status === 'AVAILABLE' && v.capacityKg >= minCapacity)];
   });
@@ -143,7 +167,7 @@ export function startMockServer() {
       updatedAt: new Date().toISOString(),
     };
     shipments.push(newShipment);
-    order.status = OrderStatus.DISPATCHED;
+    order.status = OrderStatus.SHIPPED;
     order.updatedAt = new Date().toISOString();
     vehicle.status = 'IN_USE';
     driver.status = 'ASSIGNED';
@@ -163,21 +187,34 @@ export function startMockServer() {
 
   mock.onPatch(/\/shipments\/([^/]+)\/status/).reply((config) => {
     const id = config.url!.split('/')[2];
-    const { status } = JSON.parse(config.data);
+    const { status, location, description } = JSON.parse(config.data);
     const shipment = shipments.find(s => s.id === id);
     if (!shipment) return [404, { message: 'Shipment not found.' }];
     shipment.status = status;
     shipment.updatedAt = new Date().toISOString();
 
     const order = orders.find(o => o.id === shipment.orderId);
+    const vehicle = vehicles.find(v => v.id === shipment.vehicleId);
+    const driver = drivers.find(d => d.id === shipment.driverId);
+
     if (order && status === ShipmentStatus.DELIVERED) {
       order.status = OrderStatus.DELIVERED;
       order.updatedAt = new Date().toISOString();
-      const vehicle = vehicles.find(v => v.id === shipment.vehicleId);
-      const driver = drivers.find(d => d.id === shipment.driverId);
       if (vehicle) vehicle.status = 'AVAILABLE';
       if (driver) driver.status = 'AVAILABLE';
     }
+
+    const eventLocation = location || order?.destination || 'Unknown location';
+    const eventNote = description || `Shipment status changed to ${status}`;
+    const newEvent: TrackingEvent = {
+      id: `trk-${String(trackingEvents.length + 1).padStart(3, '0')}`,
+      shipmentId: id,
+      orderId: shipment.orderId,
+      location: eventLocation,
+      note: eventNote,
+      timestamp: new Date().toISOString(),
+    };
+    trackingEvents.push(newEvent);
 
     return [200, enrichShipment(shipment)];
   });

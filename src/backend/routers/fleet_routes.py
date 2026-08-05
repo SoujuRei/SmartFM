@@ -1,7 +1,7 @@
 import logging
-from typing import List
+from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from controllers.fleet_manager import FleetManager
 from core.exceptions import DatabaseConnectionError, NotFoundError, ValidationError
@@ -12,11 +12,73 @@ from schemas.shipment_schema import (
     ShipmentResponse,
     StatusUpdateRequest,
     StatusUpdateResponse,
+    TrackingRecordResponse,
+    ShipmentListResponse,
+    AddTrackingRequest
 )
+from schemas.order_schema import OrderResponse
+from schemas.driver_schema import DriverResponse
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/fleet", tags=["fleet"])
 
+def build_shipment_response(data):
+
+    shipment = data["shipment"]
+    order = data["order"]
+    vehicle = data["vehicle"]
+    driver = data["driver"]
+
+
+    return ShipmentResponse(
+
+        shipmentId=shipment.shipment_id,
+        orderId=shipment.order_id,
+        vehicleId=shipment.vehicle_id,
+        driverId=shipment.driver_id,
+        estimatedDelivery=shipment.estimated_delivery if getattr(shipment, "estimated_delivery", None) else None,
+        status=shipment.status.value,
+
+
+        order=OrderResponse(
+            orderId=order.order_id,
+            customerId=order.customer_id,
+            status=order.status.value,
+            origin=order.origin,
+            destination=order.destination,
+            distanceKm=order.distance_km,
+            totalAmount=order.total_amount,
+            totalWeightKg=order.total_weight_kg,
+            paymentMethod=order.payment_method,
+            isPaid=order.is_paid,
+            cargoItems=[
+                {
+                    "cargoId": item.cargo_id,
+                    "weightKg": item.weight,
+                    "dimensions": item.dimensions_object(),
+                    "cargoType": item.type,
+                }
+                for item in order.items
+            ],
+        ),
+
+
+        vehicle=VehicleResponse(
+            vehicleId=vehicle.vehicle_id,
+            registration=vehicle.registration,
+            capacityWeight=vehicle.capacity_weight,
+            isAvailable=vehicle.is_available,
+        ),
+
+
+        driver=DriverResponse(
+            id=driver.user_id,
+            name=driver.name,
+            email=driver.email,
+            licenseNumber=driver.license_number,
+            isAvailable=driver.is_available,
+        )
+    )
 
 def get_fleet_manager() -> FleetManager:
     return FleetManager()
@@ -24,11 +86,11 @@ def get_fleet_manager() -> FleetManager:
 
 @router.get("/vehicles/available", response_model=List[VehicleResponse])
 def get_vehicles(
-    required_capacity: float = 0.0,
+    minCapacity: float = 0.0,
     fleet_manager: FleetManager = Depends(get_fleet_manager),
 ):
     try:
-        vehicles = fleet_manager.get_available_vehicles(required_capacity)
+        vehicles = fleet_manager.get_available_vehicles(minCapacity)
     except DatabaseConnectionError as exc:
         logger.error("Vehicle lookup failed: %s", exc)
         raise HTTPException(
@@ -38,12 +100,139 @@ def get_vehicles(
 
     return [
         VehicleResponse(
-            vehicle_id=v.vehicle_id,
+            vehicleId=v.vehicle_id,
             registration=v.registration,
-            capacity_weight=v.capacity_weight,
-            is_available=v.is_available,
+            capacityWeight=v.capacity_weight,
+            isAvailable=v.is_available,
         )
         for v in vehicles
+    ]
+
+@router.get("/shipments/{shipment_id}", response_model=ShipmentResponse)
+def get_shipment(
+    shipment_id: str,
+    fleet_manager: FleetManager = Depends(get_fleet_manager),
+):
+
+    try:
+        data = fleet_manager.get_enriched_shipment(
+            shipment_id
+        )
+
+    except NotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail="Shipment not found"
+        )
+
+
+    return build_shipment_response(data)
+
+@router.get("/shipments", response_model=list[ShipmentResponse])
+def list_shipments(
+    driverId: Optional[str] = None,
+    fleet_manager: FleetManager = Depends(get_fleet_manager),
+):
+
+    if driverId:
+        shipments = fleet_manager.list_enriched_shipments_by_driver(driverId)
+    else:
+        shipments = fleet_manager.list_enriched_shipments()
+
+    return [build_shipment_response(s) for s in shipments]
+
+@router.post(
+    "/shipments",
+    response_model=ShipmentResponse,
+    status_code=status.HTTP_201_CREATED
+)
+def create_shipment(
+    req: DispatchRequest,
+    fleet_manager: FleetManager = Depends(get_fleet_manager),
+):
+
+    try:
+        shipment = fleet_manager.dispatch_shipment(
+            req.orderId,
+            req.vehicleId,
+            req.driverId
+        )
+
+        data = fleet_manager.get_enriched_shipment(
+            shipment.shipment_id
+        )
+
+    except ValidationError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc)
+        )
+
+    return build_shipment_response(data)
+
+@router.post(
+    "/shipments/{shipment_id}/tracking",
+    response_model=TrackingRecordResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def add_tracking(
+    shipment_id: str,
+    req: AddTrackingRequest,
+    fleet_manager: FleetManager = Depends(get_fleet_manager),
+):
+
+    try:
+        record = fleet_manager.add_tracking(
+            shipment_id,
+            req.location,
+            req.description,
+        )
+
+    except NotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail="Shipment not found",
+        )
+
+    except DatabaseConnectionError as exc:
+        logger.error(
+            "Tracking creation failed: %s",
+            exc,
+        )
+
+        raise HTTPException(
+            status_code=503,
+            detail="Fleet service temporarily unavailable",
+        )
+
+
+    return TrackingRecordResponse(
+        recordId=record.record_id,
+        shipmentId=record.shipment_id,
+        timestamp=record.timestamp,
+        currentLocation=record.current_location,
+        description=record.description,
+    )
+
+@router.get(
+    "/shipments/{shipment_id}/tracking",
+    response_model=list[TrackingRecordResponse]
+)
+def get_tracking_history(
+    shipment_id: str,
+    fleet_manager: FleetManager = Depends(get_fleet_manager),
+):
+    records = fleet_manager.get_tracking_history(shipment_id)
+
+    return [
+        TrackingRecordResponse(
+            recordId=r.record_id,
+            shipmentId=r.shipment_id,
+            timestamp=r.timestamp,
+            currentLocation=r.current_location,
+            description=r.description,
+        )
+        for r in records
     ]
 
 
@@ -57,7 +246,7 @@ def dispatch_shipment(
 ):
     try:
         shipment = fleet_manager.dispatch_shipment(
-            req.order_id, req.vehicle_id, req.driver_id
+            req.orderId, req.vehicleId, req.driverId
         )
     except NotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
@@ -73,10 +262,11 @@ def dispatch_shipment(
     return DispatchResult(
         message="Shipment dispatched",
         shipment=ShipmentResponse(
-            shipment_id=shipment.shipment_id,
-            order_id=shipment.order_id,
-            vehicle_id=shipment.vehicle_id,
-            driver_id=shipment.driver_id,
+            shipmentId=shipment.shipment_id,
+            orderId=shipment.order_id,
+            vehicleId=shipment.vehicle_id,
+            driverId=shipment.driver_id,
+            estimatedDelivery=shipment.estimated_delivery if getattr(shipment, "estimated_delivery", None) else None,
             status=shipment.status.value,
         ),
     )

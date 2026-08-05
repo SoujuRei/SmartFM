@@ -56,13 +56,13 @@ export function DriverDashboardPage() {
           ) : (
             <ul className="space-y-4">
               {activeShipments.map(shipment => (
-                <li key={shipment.id} className="p-4 rounded-md border border-[#B7D9E5] bg-[#ffffff]">
+                <li key={shipment.shipmentId ?? shipment.id} className="p-4 rounded-md border border-[#B7D9E5] bg-[#ffffff]">
                   <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
                     <div className="space-y-2">
                       <div className="flex items-center gap-3 flex-wrap">
-                        <span className="font-mono text-xs font-semibold text-[#183446]">{shipment.id.toUpperCase()}</span>
+                        <span className="font-mono text-xs font-semibold text-[#183446]">{(shipment.shipmentId ?? shipment.id)?.toUpperCase()}</span>
                         <StatusBadge type="shipment" status={shipment.status} />
-                        <span className="font-mono text-[11px] text-[#6A95A7]">{shipment.order?.id.toUpperCase()}</span>
+                        <span className="font-mono text-[11px] text-[#6A95A7]">{(shipment.order?.orderId ?? shipment.order?.id ?? '').toUpperCase()}</span>
                       </div>
                       <p className="font-semibold text-[#183446] text-sm">{shipment.order?.origin} to {shipment.order?.destination}</p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-xs text-[#4B7084]">
@@ -89,9 +89,9 @@ export function DriverDashboardPage() {
           <div className="p-4">
             <ul className="divide-y divide-[#B7D9E5]">
               {deliveredShipments.map(shipment => (
-                <li key={shipment.id} className="py-3 flex justify-between items-center gap-3">
+                <li key={shipment.shipmentId ?? shipment.id} className="py-3 flex justify-between items-center gap-3">
                   <div>
-                    <p className="font-mono text-xs text-[#183446]">{shipment.id.toUpperCase()}</p>
+                    <p className="font-mono text-xs text-[#183446]">{(shipment.shipmentId ?? shipment.id)?.toUpperCase()}</p>
                     <p className="text-sm font-medium text-[#4B7084]">{shipment.order?.destination}</p>
                   </div>
                   <StatusBadge type="shipment" status={shipment.status} />
@@ -115,7 +115,8 @@ export function DriverDashboardPage() {
 
 function getNextStatus(status: ShipmentStatus) {
   if (status === ShipmentStatus.ASSIGNED) return ShipmentStatus.IN_TRANSIT;
-  if (status === ShipmentStatus.IN_TRANSIT || status === ShipmentStatus.DELAYED) return ShipmentStatus.DELIVERED;
+  if (status === ShipmentStatus.IN_TRANSIT) return ShipmentStatus.DELIVERED;
+  if (status === ShipmentStatus.DELAYED) return ShipmentStatus.IN_TRANSIT;
   return null;
 }
 
@@ -128,12 +129,19 @@ function UpdateTrackingModal({ shipment, isOpen, onClose }: { shipment: Enriched
   const nextStatus = getNextStatus(shipment.status);
   const isSubmitting = updateStatus.isPending || addTracking.isPending;
 
+  const shipmentId = shipment.shipmentId ?? shipment.id;
+
   const handleSubmit = async () => {
     if (status !== shipment.status) {
-      await updateStatus.mutateAsync({ shipmentId: shipment.id, status });
+      await updateStatus.mutateAsync({
+        shipmentId,
+        status,
+        location: location.trim() || shipment.order?.destination || 'Unknown location',
+        description: note.trim() || `Shipment status changed to ${status}`,
+      });
     }
     if (location.trim() && note.trim()) {
-      await addTracking.mutateAsync({ shipmentId: shipment.id, payload: { location, note } });
+      await addTracking.mutateAsync({ shipmentId, payload: { location, note } });
     }
     onClose();
   };

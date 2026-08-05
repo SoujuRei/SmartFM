@@ -8,7 +8,8 @@ class OrderStatus(str, Enum):
     CANCELLED = "CANCELLED"
 
 class ShipmentStatus(str, Enum):
-    DISPATCHED = "DISPATCHED"
+    ASSIGNED = "ASSIGNED"
     IN_TRANSIT = "IN_TRANSIT"
-    ARRIVED = "ARRIVED"
+    DELIVERED = "DELIVERED"
     DELAYED = "DELAYED"
+    

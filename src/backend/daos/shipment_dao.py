@@ -21,6 +21,24 @@ class ShipmentDAO:
     def __init__(self):
         self.db = DatabaseConnection().get_instance()
 
+    def _normalize_shipment_row(self, row: dict) -> Shipment:
+        payload = dict(row)
+        status = payload.get("status")
+
+        if isinstance(status, str):
+            normalized = status.strip().upper()
+            if normalized == "DISPATCHED":
+                payload["status"] = ShipmentStatus.ASSIGNED
+            else:
+                try:
+                    payload["status"] = ShipmentStatus(normalized)
+                except ValueError:
+                    payload["status"] = ShipmentStatus.ASSIGNED
+        elif status is None:
+            payload["status"] = ShipmentStatus.ASSIGNED
+
+        return Shipment(**payload)
+
     def save_shipment(self, shipment: Shipment) -> Shipment:
         data = shipment.model_dump(exclude={"shipment_id", "dispatch_date"})
         data["status"] = data["status"].value
@@ -43,7 +61,7 @@ class ShipmentDAO:
         if not response.data:
             raise DatabaseConnectionError("Shipment insert returned no data")
 
-        return Shipment(**response.data[0])
+        return self._normalize_shipment_row(response.data[0])
 
     def get_by_order_id(self, order_id: str) -> Shipment | None:
         try:
@@ -65,7 +83,7 @@ class ShipmentDAO:
         if not res.data:
             return None
 
-        return Shipment(**res.data[0])
+        return self._normalize_shipment_row(res.data[0])
     
     def get_shipment_by_id(self, shipment_id: str) -> Shipment:
         try:
@@ -89,7 +107,7 @@ class ShipmentDAO:
                 f"Shipment {shipment_id} not found"
             )
 
-        return Shipment(**res.data[0])
+        return self._normalize_shipment_row(res.data[0])
 
 
     def list_shipments(self) -> List[Shipment]:
@@ -108,7 +126,7 @@ class ShipmentDAO:
             ) from exc
 
         return [
-            Shipment(**row)
+            self._normalize_shipment_row(row)
             for row in res.data
         ]
 
@@ -127,7 +145,7 @@ class ShipmentDAO:
                 f"Shipment lookup failed: {exc}"
             ) from exc
 
-        return [Shipment(**row) for row in res.data]
+        return [self._normalize_shipment_row(row) for row in res.data]
 
 
     def get_tracking_history(
@@ -170,7 +188,7 @@ class ShipmentDAO:
             logger.exception("Failed fetching active shipments for vehicle=%s", vehicle_id)
             raise DatabaseConnectionError(f"Shipment lookup failed: {exc}") from exc
 
-        return [Shipment(**row) for row in res.data]
+        return [self._normalize_shipment_row(row) for row in res.data]
 
     def get_active_shipments_by_driver(self, driver_id: str) -> List[Shipment]:
         try:
@@ -185,7 +203,7 @@ class ShipmentDAO:
             logger.exception("Failed fetching active shipments for driver=%s", driver_id)
             raise DatabaseConnectionError(f"Shipment lookup failed: {exc}") from exc
 
-        return [Shipment(**row) for row in res.data]
+        return [self._normalize_shipment_row(row) for row in res.data]
 
     def delete_tracking_by_shipment_id(self, shipment_id: str) -> int:
         try:
@@ -230,7 +248,7 @@ class ShipmentDAO:
         if not res.data:
             raise NotFoundError(f"Shipment {shipment_id} not found")
 
-        return Shipment(**res.data[0])
+        return self._normalize_shipment_row(res.data[0])
 
     def add_tracking_record(self, record: TrackingRecord) -> TrackingRecord:
         data = record.model_dump(exclude={"record_id"})

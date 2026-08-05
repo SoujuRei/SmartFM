@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-import { useOrders, usePayOrder } from '../hooks';
+import { useOrders, usePayOrder, useCancelOrder, useDeleteOrder } from '../hooks';
 import { OrderStatus, type OrderStatus as OrderStatusType } from '../../../constants/enums';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { Button } from '../../../components/ui/Button';
@@ -19,6 +19,8 @@ export function CustomerDashboardPage() {
   const { loggedInUser } = useAuth();
   const { data: orders, isLoading } = useOrders(loggedInUser?.id);
   const payMutation = usePayOrder();
+  const cancelMutation = useCancelOrder();
+  const deleteMutation = useDeleteOrder();
   const [payingOrder, setPayingOrder] = useState<Order | null>(null);
 
   const totalOrders = orders?.length ?? 0;
@@ -119,22 +121,65 @@ export function CustomerDashboardPage() {
                       {formatCurrency(order.totalAmount)}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         {order.status === OrderStatus.PENDING && (
+                          <>
+                            <Button
+                              size="sm"
+                              onClick={() => setPayingOrder(order)}
+                              isLoading={payMutation.isPending}
+                            >
+                              Pay Now
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => cancelMutation.mutate(order.id)}
+                              isLoading={cancelMutation.isPending}
+                            >
+                              Cancel
+                            </Button>
+                          </>
+                        )}
+                        {order.status === OrderStatus.PROCESSING && (
                           <Button
                             size="sm"
-                            onClick={() => setPayingOrder(order)}
-                            isLoading={payMutation.isPending}
+                            variant="secondary"
+                            onClick={() => cancelMutation.mutate(order.id)}
+                            isLoading={cancelMutation.isPending}
                           >
-                            Pay Now
+                            Cancel
                           </Button>
                         )}
-                        {[OrderStatus.SHIPPED, OrderStatus.DELIVERED].includes(
-                          order.status as OrderStatusType
-                        ) && (
+                        {order.status === OrderStatus.SHIPPED && (
+                          <>
+                            <Link to={`/customer/orders/${order.id}/tracking`}>
+                              <Button size="sm" variant="secondary">Track</Button>
+                            </Link>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => cancelMutation.mutate(order.id)}
+                              isLoading={cancelMutation.isPending}
+                            >
+                              Cancel
+                            </Button>
+                          </>
+                        )}
+                        {order.status === OrderStatus.DELIVERED && (
                           <Link to={`/customer/orders/${order.id}/tracking`}>
                             <Button size="sm" variant="secondary">Track</Button>
                           </Link>
+                        )}
+                        {order.status === OrderStatus.CANCELLED && (
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => deleteMutation.mutate(order.id)}
+                            isLoading={deleteMutation.isPending}
+                          >
+                            Delete
+                          </Button>
                         )}
                       </div>
                     </td>

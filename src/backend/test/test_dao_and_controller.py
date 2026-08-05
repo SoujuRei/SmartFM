@@ -80,7 +80,24 @@ class TestShipmentDAO(unittest.TestCase):
             DC.return_value.get_instance.return_value = fake_db
             dao = ShipmentDAO()
             with self.assertRaises(Exception):
-                dao.update_shipment_status("nope", ShipmentStatus.ARRIVED)
+                dao.update_shipment_status("nope", ShipmentStatus.IN_TRANSIT)
+
+    def test_normalizes_dispatch_status_on_load(self):
+        fake_db = MagicMock()
+        row = {
+            "shipment_id": "s1",
+            "order_id": "o1",
+            "vehicle_id": "v1",
+            "driver_id": "d1",
+            "status": "DISPATCHED",
+            "dispatch_date": "2026-01-01T00:00:00",
+        }
+        fake_db.table.return_value.select.return_value.eq.return_value.execute.return_value = MockResponse([row])
+        with patch('daos.shipment_dao.DatabaseConnection') as DC:
+            DC.return_value.get_instance.return_value = fake_db
+            dao = ShipmentDAO()
+            shipment = dao.get_by_order_id("o1")
+            self.assertEqual(shipment.status, ShipmentStatus.ASSIGNED)
 
 
 class TestControllers(unittest.TestCase):
@@ -96,10 +113,11 @@ class TestControllers(unittest.TestCase):
     def test_fleet_manager_update_status_generates_tracking_when_success(self):
         with patch('controllers.fleet_manager.ShipmentDAO') as MockDAO:
             inst = MockDAO.return_value
-            inst.update_shipment_status.return_value = {"shipment_id":"s1"}
-            inst.add_tracking_record.return_value = {"record_id":"r1"}
+            inst.get_shipment_by_id.return_value = Shipment(order_id="o1", vehicle_id="v1", driver_id="d1", status=ShipmentStatus.ASSIGNED)
+            inst.update_shipment_status.return_value = Shipment(shipment_id="s1", order_id="o1", vehicle_id="v1", driver_id="d1", status=ShipmentStatus.IN_TRANSIT)
+            inst.add_tracking_record.return_value = TrackingRecord(record_id="r1", shipment_id="s1", current_location="here", description="arrived")
             fm = FleetManager()
-            ok = fm.update_status("s1", ShipmentStatus.ARRIVED, "here", "arrived")
+            ok = fm.update_status("s1", ShipmentStatus.IN_TRANSIT, "here", "arrived")
             self.assertTrue(ok)
             inst.add_tracking_record.assert_called_once()
 

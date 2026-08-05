@@ -87,6 +87,74 @@ export function startMockServer() {
     return [200, newPayment];
   });
 
+  mock.onPost(/\/orders\/([^/]+)\/cancel/).reply((config) => {
+    const orderId = config.url!.split('/')[2];
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return [404, { message: 'Order not found.' }];
+    if (order.status === OrderStatus.DELIVERED) {
+      return [400, { message: 'Cannot cancel an order that has already been delivered.' }];
+    }
+    if (order.status === OrderStatus.CANCELLED) {
+      return [400, { message: 'Order is already cancelled.' }];
+    }
+
+    if (order.isPaid) {
+      const refund: Payment = {
+        id: `pay-${String(payments.length + 1).padStart(3, '0')}`,
+        orderId: order.id,
+        amount: -order.totalAmount,
+        method: order.paymentMethod,
+        status: 'REFUNDED',
+        paidAt: new Date().toISOString(),
+      };
+      payments.push(refund);
+      order.isPaid = false;
+    }
+
+    const shipment = shipments.find(s => s.orderId === order.id);
+    if (shipment && shipment.status !== ShipmentStatus.DELIVERED) {
+      const vehicle = vehicles.find(v => v.id === shipment.vehicleId);
+      const driver = drivers.find(d => d.id === shipment.driverId);
+      if (vehicle) vehicle.status = 'AVAILABLE';
+      if (driver) driver.status = 'AVAILABLE';
+      for (let i = trackingEvents.length - 1; i >= 0; i -= 1) {
+        if (trackingEvents[i].shipmentId === shipment.id) trackingEvents.splice(i, 1);
+      }
+      const shipmentIndex = shipments.findIndex(s => s.id === shipment.id);
+      if (shipmentIndex !== -1) shipments.splice(shipmentIndex, 1);
+    }
+
+    order.status = OrderStatus.CANCELLED;
+    order.updatedAt = new Date().toISOString();
+    return [200, { message: 'Order cancelled successfully.' }];
+  });
+
+  mock.onDelete(/\/orders\/([^/]+)$/).reply((config) => {
+    const orderId = config.url!.split('/')[2];
+    const orderIndex = orders.findIndex(o => o.id === orderId);
+    if (orderIndex === -1) return [404, { message: 'Order not found.' }];
+
+    const order = orders[orderIndex];
+    if (order.status !== OrderStatus.CANCELLED) {
+      return [400, { message: 'Only cancelled orders can be deleted.' }];
+    }
+
+    for (let i = payments.length - 1; i >= 0; i -= 1) {
+      if (payments[i].orderId === orderId) payments.splice(i, 1);
+    }
+    const shipmentIndex = shipments.findIndex(s => s.orderId === orderId);
+    if (shipmentIndex !== -1) {
+      const shipment = shipments[shipmentIndex];
+      for (let i = trackingEvents.length - 1; i >= 0; i -= 1) {
+        if (trackingEvents[i].shipmentId === shipment.id) trackingEvents.splice(i, 1);
+      }
+      shipments.splice(shipmentIndex, 1);
+    }
+    orders.splice(orderIndex, 1);
+
+    return [200, { message: 'Order deleted successfully.' }];
+  });
+
   mock.onGet(/\/orders\/([^/]+)$/).reply((config) => {
     const id = config.url!.split('/').pop()!;
     const order = orders.find(o => o.id === id);

@@ -144,7 +144,7 @@ CREATE TABLE shipments (
     order_id UUID REFERENCES orders(order_id),
     vehicle_id UUID REFERENCES vehicles(vehicle_id),
     driver_id UUID REFERENCES users(id),
-    status TEXT DEFAULT 'DISPATCHED',
+    status TEXT DEFAULT 'ASSIGNED',
     estimated_delivery TIMESTAMP
 );
 

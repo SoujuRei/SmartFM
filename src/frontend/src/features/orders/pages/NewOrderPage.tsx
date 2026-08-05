@@ -75,13 +75,13 @@ export function NewOrderPage() {
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate(-1)}
-          className="text-[#505f76] hover:text-[#131b2e] hover:bg-[#f2f3ff] rounded-md p-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40"
+          className="text-[#4B7084] hover:text-[#183446] hover:bg-[#E4F5FB] rounded-md p-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#0090C1]/40"
         >
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
         <div>
-          <h2 className="font-display text-3xl font-bold text-[#131b2e]">New Order</h2>
-          <p className="text-sm text-[#505f76]">Create an order with one or more measured cargo items.</p>
+          <h2 className="font-display text-3xl font-bold text-[#183446]">New Order</h2>
+          <p className="text-sm text-[#4B7084]">Create an order with one or more measured cargo items.</p>
         </div>
       </div>
 
@@ -92,18 +92,18 @@ export function NewOrderPage() {
             <Input id="destination" label="Destination" placeholder="Sydney, NSW" {...register('destination')} error={errors.destination?.message} />
           </div>
 
-          <div className="space-y-4 border-t border-[#c3c6d7] pt-5">
+          <div className="space-y-4 border-t border-[#B7D9E5] pt-5">
             <div className="flex items-center justify-between gap-3">
-              <h3 className="font-display text-lg font-semibold text-[#131b2e]">Cargo Items</h3>
+              <h3 className="font-display text-lg font-semibold text-[#183446]">Cargo Items</h3>
               <Button type="button" variant="secondary" size="sm" onClick={() => append(emptyCargo)}>
                 Add Cargo
               </Button>
             </div>
 
             {fields.map((field, index) => (
-              <div key={field.id} className="rounded-md border border-[#c3c6d7] bg-[#faf8ff] p-4 space-y-4">
+              <div key={field.id} className="rounded-md border border-[#B7D9E5] bg-[#F1F9FC] p-4 space-y-4">
                 <div className="flex items-center justify-between">
-                  <p className="font-mono text-xs font-semibold text-[#131b2e]">CARGO-{String(index + 1).padStart(2, '0')}</p>
+                  <p className="font-mono text-xs font-semibold text-[#183446]">CARGO-{String(index + 1).padStart(2, '0')}</p>
                   {fields.length > 1 && (
                     <Button type="button" variant="ghost" size="sm" onClick={() => remove(index)}>Remove</Button>
                   )}
@@ -143,7 +143,7 @@ export function NewOrderPage() {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 border-t border-[#c3c6d7] pt-5 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 border-t border-[#B7D9E5] pt-5 items-end">
             <Select
               id="paymentMethod"
               label="Payment Method"
@@ -155,9 +155,9 @@ export function NewOrderPage() {
                 <option key={value} value={value}>{label}</option>
               ))}
             </Select>
-            <div className="rounded-md border border-[#c3c6d7] bg-[#f2f3ff] px-4 py-3 min-w-56">
-              <p className="text-xs text-[#505f76]">Estimated total</p>
-              <p className="font-mono text-lg font-semibold text-[#131b2e]">
+            <div className="rounded-md border border-[#B7D9E5] bg-[#E4F5FB] px-4 py-3 min-w-56">
+              <p className="text-xs text-[#4B7084]">Estimated total</p>
+              <p className="font-mono text-lg font-semibold text-[#183446]">
                 {new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(estimatedTotal)}
               </p>
             </div>

@@ -13,7 +13,7 @@ function formatCurrency(amount: number) {
   return new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }).format(amount);
 }
 
-const COLORS = ['#004ac6', '#505f76', '#2563eb', '#059669', '#ba1a1a'];
+const COLORS = ['#022F40', '#4B7084', '#0090C1', '#059669', '#ba1a1a'];
 
 export function ReportsPage() {
   const [startDate, setStartDate] = useState('');
@@ -37,8 +37,8 @@ export function ReportsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-3xl font-bold text-[#131b2e]">Reports</h2>
-        <p className="text-sm text-[#505f76]">Revenue, delivered volume, and order status breakdown by date range.</p>
+        <h2 className="font-display text-3xl font-bold text-[#183446]">Reports</h2>
+        <p className="text-sm text-[#4B7084]">Revenue, delivered volume, and order status breakdown by date range.</p>
       </div>
 
       <Card>
@@ -50,17 +50,17 @@ export function ReportsPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <Card className="border-l-4 border-l-[#2563eb]">
-          <p className="text-sm text-[#505f76] mb-1 font-medium uppercase tracking-wide">Total Revenue</p>
-          <p className="font-mono text-3xl font-bold text-[#131b2e]">{formatCurrency(totalRevenue)}</p>
+        <Card className="border-l-4 border-l-[#0090C1]">
+          <p className="text-sm text-[#4B7084] mb-1 font-medium uppercase tracking-wide">Total Revenue</p>
+          <p className="font-mono text-3xl font-bold text-[#183446]">{formatCurrency(totalRevenue)}</p>
         </Card>
-        <Card className="border-l-4 border-l-[#505f76]">
-          <p className="text-sm text-[#505f76] mb-1 font-medium uppercase tracking-wide">Total Orders</p>
-          <p className="font-mono text-3xl font-bold text-[#131b2e]">{totalOrders}</p>
+        <Card className="border-l-4 border-l-[#4B7084]">
+          <p className="text-sm text-[#4B7084] mb-1 font-medium uppercase tracking-wide">Total Orders</p>
+          <p className="font-mono text-3xl font-bold text-[#183446]">{totalOrders}</p>
         </Card>
         <Card className="border-l-4 border-l-[#059669]">
-          <p className="text-sm text-[#505f76] mb-1 font-medium uppercase tracking-wide">Delivered</p>
-          <p className="font-mono text-3xl font-bold text-[#131b2e]">{deliveredOrders}</p>
+          <p className="text-sm text-[#4B7084] mb-1 font-medium uppercase tracking-wide">Delivered</p>
+          <p className="font-mono text-3xl font-bold text-[#183446]">{deliveredOrders}</p>
         </Card>
       </div>
 
@@ -71,21 +71,21 @@ export function ReportsPage() {
           <div className="p-6 h-[300px] flex-1">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthly} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#c3c6d7" vertical={false} />
-                <XAxis dataKey="month" stroke="#737686" fontSize={12} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#B7D9E5" vertical={false} />
+                <XAxis dataKey="month" stroke="#6A95A7" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis
-                  stroke="#737686"
+                  stroke="#6A95A7"
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(value) => `$${value}`}
                 />
                 <Tooltip
-                  cursor={{ fill: '#f2f3ff' }}
-                  contentStyle={{ borderRadius: '6px', border: '1px solid #c3c6d7', background: '#ffffff' }}
+                  cursor={{ fill: '#E4F5FB' }}
+                  contentStyle={{ borderRadius: '6px', border: '1px solid #B7D9E5', background: '#ffffff' }}
                   formatter={(value: any) => [formatCurrency(value), 'Revenue']}
                 />
-                <Bar dataKey="revenue" fill="#2563eb" radius={[3, 3, 0, 0]} maxBarSize={50} />
+                <Bar dataKey="revenue" fill="#0090C1" radius={[3, 3, 0, 0]} maxBarSize={50} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -111,7 +111,7 @@ export function ReportsPage() {
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ borderRadius: '6px', border: '1px solid #c3c6d7', background: '#ffffff' }}
+                  contentStyle={{ borderRadius: '6px', border: '1px solid #B7D9E5', background: '#ffffff' }}
                   formatter={(value: any, name: any) => [value, String(name).replace('_', ' ')]}
                 />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />

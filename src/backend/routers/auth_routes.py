@@ -1,8 +1,8 @@
 import logging
+import secrets
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, EmailStr
-from schemas.auth_schema import LoginRequest, LoginResponse
+from schemas.auth_schema import LoginRequest, LoginResponse, LoginUser
 
 
 from core.exceptions import DatabaseConnectionError
@@ -38,9 +38,19 @@ def login(req: LoginRequest, user_dao: UserDAO = Depends(get_user_dao)):
             detail="Invalid email or password",
         )
 
+    user_id = user.user_id or ""
+    access_token = secrets.token_urlsafe(32)
+
     return LoginResponse(
         message="Login successful",
-        user_id=user.user_id,
+        access_token=access_token,
+        user=LoginUser(
+            id=user_id,
+            name=user.name,
+            email=user.email,
+            role=user.role.value,
+        ),
+        user_id=user_id,
         role=user.role.value,
         name=user.name,
     )

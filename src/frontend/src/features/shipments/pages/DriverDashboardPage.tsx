@@ -42,8 +42,8 @@ export function DriverDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-3xl font-bold text-[#131b2e]">My Shipments</h2>
-        <p className="text-sm text-[#505f76]">Update assigned shipment status and add tracking records.</p>
+        <h2 className="font-display text-3xl font-bold text-[#183446]">My Shipments</h2>
+        <p className="text-sm text-[#4B7084]">Update assigned shipment status and add tracking records.</p>
       </div>
 
       <Card padding={false}>
@@ -56,20 +56,20 @@ export function DriverDashboardPage() {
           ) : (
             <ul className="space-y-4">
               {activeShipments.map(shipment => (
-                <li key={shipment.id} className="p-4 rounded-md border border-[#c3c6d7] bg-[#ffffff]">
+                <li key={shipment.id} className="p-4 rounded-md border border-[#B7D9E5] bg-[#ffffff]">
                   <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
                     <div className="space-y-2">
                       <div className="flex items-center gap-3 flex-wrap">
-                        <span className="font-mono text-xs font-semibold text-[#131b2e]">{shipment.id.toUpperCase()}</span>
+                        <span className="font-mono text-xs font-semibold text-[#183446]">{shipment.id.toUpperCase()}</span>
                         <StatusBadge type="shipment" status={shipment.status} />
-                        <span className="font-mono text-[11px] text-[#737686]">{shipment.order?.id.toUpperCase()}</span>
+                        <span className="font-mono text-[11px] text-[#6A95A7]">{shipment.order?.id.toUpperCase()}</span>
                       </div>
-                      <p className="font-semibold text-[#131b2e] text-sm">{shipment.order?.origin} to {shipment.order?.destination}</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-xs text-[#505f76]">
-                        <p>Vehicle: <span className="font-medium text-[#131b2e]">{shipment.vehicle?.plateNumber} · {shipment.vehicle?.type}</span></p>
-                        <p>Weight: <span className="font-medium text-[#131b2e]">{shipment.order?.totalWeightKg}kg</span></p>
-                        <p>Dimensions: <span className="font-medium text-[#131b2e]">{dimensions(shipment)}</span></p>
-                        <p>Payment: <span className="font-medium text-[#131b2e]">{shipment.order?.isPaid ? 'Paid' : 'Unpaid'}</span></p>
+                      <p className="font-semibold text-[#183446] text-sm">{shipment.order?.origin} to {shipment.order?.destination}</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-xs text-[#4B7084]">
+                        <p>Vehicle: <span className="font-medium text-[#183446]">{shipment.vehicle?.plateNumber} · {shipment.vehicle?.type}</span></p>
+                        <p>Weight: <span className="font-medium text-[#183446]">{shipment.order?.totalWeightKg}kg</span></p>
+                        <p>Dimensions: <span className="font-medium text-[#183446]">{dimensions(shipment)}</span></p>
+                        <p>Payment: <span className="font-medium text-[#183446]">{shipment.order?.isPaid ? 'Paid' : 'Unpaid'}</span></p>
                       </div>
                     </div>
                     <Button className="w-full md:w-auto" onClick={() => setSelectedShipment(shipment)}>
@@ -87,12 +87,12 @@ export function DriverDashboardPage() {
         <Card padding={false}>
           <CardHeader title="Delivered" />
           <div className="p-4">
-            <ul className="divide-y divide-[#c3c6d7]">
+            <ul className="divide-y divide-[#B7D9E5]">
               {deliveredShipments.map(shipment => (
                 <li key={shipment.id} className="py-3 flex justify-between items-center gap-3">
                   <div>
-                    <p className="font-mono text-xs text-[#131b2e]">{shipment.id.toUpperCase()}</p>
-                    <p className="text-sm font-medium text-[#505f76]">{shipment.order?.destination}</p>
+                    <p className="font-mono text-xs text-[#183446]">{shipment.id.toUpperCase()}</p>
+                    <p className="text-sm font-medium text-[#4B7084]">{shipment.order?.destination}</p>
                   </div>
                   <StatusBadge type="shipment" status={shipment.status} />
                 </li>
@@ -152,14 +152,14 @@ function UpdateTrackingModal({ shipment, isOpen, onClose }: { shipment: Enriched
     >
       <div className="space-y-5">
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-[#505f76] uppercase tracking-wide block">Shipment Status</label>
+          <label className="text-xs font-semibold text-[#4B7084] uppercase tracking-wide block">Shipment Status</label>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => setStatus(shipment.status)}
               className={[
-                'px-3 py-2 text-xs font-semibold rounded-md border transition-colors focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40',
-                status === shipment.status ? 'bg-[#131b2e] text-[#ffffff] border-[#131b2e]' : 'bg-[#ffffff] text-[#505f76] border-[#c3c6d7]',
+                'px-3 py-2 text-xs font-semibold rounded-md border transition-colors focus:outline-none focus:ring-2 focus:ring-[#0090C1]/40',
+                status === shipment.status ? 'bg-[#183446] text-[#ffffff] border-[#183446]' : 'bg-[#ffffff] text-[#4B7084] border-[#B7D9E5]',
               ].join(' ')}
             >
               Keep Current
@@ -169,8 +169,8 @@ function UpdateTrackingModal({ shipment, isOpen, onClose }: { shipment: Enriched
                 type="button"
                 onClick={() => setStatus(nextStatus)}
                 className={[
-                  'px-3 py-2 text-xs font-semibold rounded-md border transition-colors focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40',
-                  status === nextStatus ? 'bg-[#131b2e] text-[#ffffff] border-[#131b2e]' : 'bg-[#ffffff] text-[#505f76] border-[#c3c6d7]',
+                  'px-3 py-2 text-xs font-semibold rounded-md border transition-colors focus:outline-none focus:ring-2 focus:ring-[#0090C1]/40',
+                  status === nextStatus ? 'bg-[#183446] text-[#ffffff] border-[#183446]' : 'bg-[#ffffff] text-[#4B7084] border-[#B7D9E5]',
                 ].join(' ')}
               >
                 {nextStatus.replace('_', ' ')}
@@ -181,8 +181,8 @@ function UpdateTrackingModal({ shipment, isOpen, onClose }: { shipment: Enriched
                 type="button"
                 onClick={() => setStatus(ShipmentStatus.DELAYED)}
                 className={[
-                  'px-3 py-2 text-xs font-semibold rounded-md border transition-colors focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40',
-                  status === ShipmentStatus.DELAYED ? 'bg-[#131b2e] text-[#ffffff] border-[#131b2e]' : 'bg-[#ffffff] text-[#505f76] border-[#c3c6d7]',
+                  'px-3 py-2 text-xs font-semibold rounded-md border transition-colors focus:outline-none focus:ring-2 focus:ring-[#0090C1]/40',
+                  status === ShipmentStatus.DELAYED ? 'bg-[#183446] text-[#ffffff] border-[#183446]' : 'bg-[#ffffff] text-[#4B7084] border-[#B7D9E5]',
                 ].join(' ')}
               >
                 DELAYED
@@ -191,8 +191,8 @@ function UpdateTrackingModal({ shipment, isOpen, onClose }: { shipment: Enriched
           </div>
         </div>
 
-        <div className="pt-4 border-t border-[#c3c6d7] space-y-4">
-          <p className="text-sm font-semibold text-[#131b2e]">Tracking Record</p>
+        <div className="pt-4 border-t border-[#B7D9E5] space-y-4">
+          <p className="text-sm font-semibold text-[#183446]">Tracking Record</p>
           <Input label="Current Location" placeholder="Albury Checkpoint" value={location} onChange={e => setLocation(e.target.value)} />
           <Input label="Note" placeholder="Crossed state border" value={note} onChange={e => setNote(e.target.value)} />
         </div>

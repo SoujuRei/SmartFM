@@ -23,9 +23,9 @@ export function TrackingPage() {
   if (isError || !data) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4">
-        <span className="material-symbols-outlined text-5xl text-[#c3c6d7]">error</span>
-        <p className="text-[#505f76]">Could not load tracking information.</p>
-        <Link to="/customer" className="text-[#1d4ed8] text-sm hover:underline">Back to My Orders</Link>
+        <span className="material-symbols-outlined text-5xl text-[#B7D9E5]">error</span>
+        <p className="text-[#4B7084]">Could not load tracking information.</p>
+        <Link to="/customer" className="text-[#046E8F] text-sm hover:underline">Back to My Orders</Link>
       </div>
     );
   }
@@ -42,13 +42,13 @@ export function TrackingPage() {
       <div className="flex items-center gap-4">
         <Link
           to="/customer"
-          className="text-[#505f76] hover:text-[#131b2e] hover:bg-[#f2f3ff] rounded-md p-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40"
+          className="text-[#4B7084] hover:text-[#183446] hover:bg-[#E4F5FB] rounded-md p-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#0090C1]/40"
         >
           <span className="material-symbols-outlined">arrow_back</span>
         </Link>
         <div>
-          <h2 className="font-display text-3xl font-bold text-[#131b2e]">Track Shipment</h2>
-          <p className="text-sm text-[#505f76]">
+          <h2 className="font-display text-3xl font-bold text-[#183446]">Track Shipment</h2>
+          <p className="text-sm text-[#4B7084]">
             Order <span className="font-mono font-medium">{order?.id?.toUpperCase()}</span>
           </p>
         </div>
@@ -58,19 +58,19 @@ export function TrackingPage() {
       <Card>
         <div className="flex items-start justify-between mb-4">
           <div>
-            <p className="text-xs text-[#505f76] mb-1">Route</p>
-            <p className="font-semibold text-[#131b2e] text-sm">
+            <p className="text-xs text-[#4B7084] mb-1">Route</p>
+            <p className="font-semibold text-[#183446] text-sm">
               {order?.origin} to {order?.destination}
             </p>
           </div>
           <StatusBadge type="order" status={order?.status} />
         </div>
         {shipment && (shipment as { estimatedDelivery?: string }).estimatedDelivery && (
-          <div className="bg-[#f2f3ff] rounded-md px-3 py-2 flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#2563eb] text-base">schedule</span>
+          <div className="bg-[#E4F5FB] rounded-md px-3 py-2 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[#0090C1] text-base">schedule</span>
             <div>
-              <p className="text-[11px] text-[#505f76]">Estimated Delivery</p>
-              <p className="text-xs font-semibold text-[#131b2e]">
+              <p className="text-[11px] text-[#4B7084]">Estimated Delivery</p>
+              <p className="text-xs font-semibold text-[#183446]">
                 {formatDateTime((shipment as { estimatedDelivery: string }).estimatedDelivery)}
               </p>
             </div>
@@ -80,9 +80,9 @@ export function TrackingPage() {
 
       {/* Timeline */}
       <Card>
-        <h3 className="font-display text-lg font-semibold text-[#131b2e] mb-5">Tracking History</h3>
+        <h3 className="font-display text-lg font-semibold text-[#183446] mb-5">Tracking History</h3>
         {!events.length ? (
-          <p className="text-sm text-[#505f76] text-center py-6">No tracking updates yet.</p>
+          <p className="text-sm text-[#4B7084] text-center py-6">No tracking updates yet.</p>
         ) : (
           <ol className="relative">
             {events.map((event, idx) => (
@@ -92,24 +92,24 @@ export function TrackingPage() {
                   <div className={[
                     'w-3 h-3 rounded-full border-2 mt-1 flex-shrink-0',
                     idx === 0
-                      ? 'bg-[#2563eb] border-[#2563eb]'
-                      : 'bg-[#ffffff] border-[#c3c6d7]',
+                      ? 'bg-[#0090C1] border-[#0090C1]'
+                      : 'bg-[#ffffff] border-[#B7D9E5]',
                   ].join(' ')} />
                   {idx < events.length - 1 && (
-                    <div className="w-0.5 bg-[#c3c6d7] flex-1 mt-1" />
+                    <div className="w-0.5 bg-[#B7D9E5] flex-1 mt-1" />
                   )}
                 </div>
                 {/* Content */}
                 <div className="flex-1">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-sm font-semibold text-[#131b2e] flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-base text-[#2563eb]">location_on</span>
+                      <p className="text-sm font-semibold text-[#183446] flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-base text-[#0090C1]">location_on</span>
                         {event.location}
                       </p>
-                      <p className="text-xs text-[#505f76] mt-1">{event.note}</p>
+                      <p className="text-xs text-[#4B7084] mt-1">{event.note}</p>
                     </div>
-                    <p className="text-[11px] text-[#737686] whitespace-nowrap flex-shrink-0">
+                    <p className="text-[11px] text-[#6A95A7] whitespace-nowrap flex-shrink-0">
                       {formatDateTime(event.timestamp)}
                     </p>
                   </div>

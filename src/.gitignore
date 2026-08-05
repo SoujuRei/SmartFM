@@ -1,1 +1,14 @@
+# Environments
+venv/
+env/
 .env
+src/.env
+backend/.env
+frontend/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*node_modules/
+*.pyc

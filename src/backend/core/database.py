@@ -2,12 +2,14 @@ import os
 import logging
 import threading
 from typing import Optional
+from pathlib import Path
 
 from supabase import create_client, Client
 from dotenv import load_dotenv
 from core.exceptions import DatabaseConfigError, DatabaseConnectionError
 
-load_dotenv()
+BACKEND_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BACKEND_DIR / ".env")
 
 logger = logging.getLogger(__name__)
 

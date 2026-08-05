@@ -33,18 +33,18 @@ export function PaymentModal({ order, isOpen, onClose, onConfirm, isLoading }: P
       }
     >
       <div className="space-y-4">
-        <div className="bg-[#f2f3ff] rounded-md p-4 space-y-2">
+        <div className="bg-[#E4F5FB] rounded-md p-4 space-y-2">
           <Row label="Order ID" value={<span className="font-mono text-xs">{order.id.toUpperCase()}</span>} />
           <Row label="Route" value={`${order.origin} to ${order.destination}`} />
           <Row label="Cargo" value={`${order.cargoItems.map(item => CARGO_TYPE_LABELS[item.cargoType]).join(', ')} · ${order.totalWeightKg}kg`} />
           <Row label="Dimensions" value={order.cargoItems.map(item => `${item.dimensions.lengthCm}x${item.dimensions.widthCm}x${item.dimensions.heightCm}cm`).join(', ')} />
           <Row label="Payment Method" value={PAYMENT_METHOD_LABELS[order.paymentMethod]} />
         </div>
-        <div className="flex items-center justify-between px-4 py-3 bg-[#faf8ff] rounded-md border border-[#c3c6d7]">
-          <span className="text-sm font-semibold text-[#131b2e]">Total Amount</span>
-          <span className="font-mono text-xl font-bold text-[#131b2e]">{formatCurrency(order.totalAmount)}</span>
+        <div className="flex items-center justify-between px-4 py-3 bg-[#F1F9FC] rounded-md border border-[#B7D9E5]">
+          <span className="text-sm font-semibold text-[#183446]">Total Amount</span>
+          <span className="font-mono text-xl font-bold text-[#183446]">{formatCurrency(order.totalAmount)}</span>
         </div>
-        <p className="text-xs text-[#737686] text-center">
+        <p className="text-xs text-[#6A95A7] text-center">
           By confirming, you authorize the payment of {formatCurrency(order.totalAmount)} for this shipment order.
         </p>
       </div>
@@ -55,8 +55,8 @@ export function PaymentModal({ order, isOpen, onClose, onConfirm, isLoading }: P
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex justify-between items-center text-sm">
-      <span className="text-[#505f76]">{label}</span>
-      <span className="font-medium text-[#131b2e] text-right">{value}</span>
+      <span className="text-[#4B7084]">{label}</span>
+      <span className="font-medium text-[#183446] text-right">{value}</span>
     </div>
   );
 }

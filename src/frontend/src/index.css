@@ -1,22 +1,28 @@
 @import "tailwindcss";
 
 @theme {
-  --color-surface: #faf8ff;
+  --color-brand-900: #022F40;
+  --color-brand-800: #183446;
+  --color-brand-700: #046E8F;
+  --color-brand-600: #0090C1;
+  --color-brand-500: #38AECC;
+
+  --color-surface: #ECF8FC;
   --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f2f3ff;
-  --color-surface-container: #e2e7ff;
-  --color-on-surface: #131b2e;
-  --color-on-surface-variant: #505f76;
+  --color-surface-container-low: #DDF2F9;
+  --color-surface-container: #CBEAF4;
+  --color-on-surface: #183446;
+  --color-on-surface-variant: #35647B;
   --color-inverse-surface: #ffffff;
-  --color-inverse-on-surface: #faf8ff;
-  --color-outline: #737686;
-  --color-outline-variant: #c3c6d7;
-  --color-primary: #2563eb;
+  --color-inverse-on-surface: #ECF8FC;
+  --color-outline: #5E8CA2;
+  --color-outline-variant: #A8D1DF;
+  --color-primary: #0090C1;
   --color-on-primary: #ffffff;
   --color-error: #ba1a1a;
   --color-on-error: #ffffff;
-  --color-background: #faf8ff;
-  --color-on-background: #131b2e;
+  --color-background: #ECF8FC;
+  --color-on-background: #183446;
   
   --font-inter: "Aptos", "Segoe UI", sans-serif;
   --font-display: "Georgia", "Times New Roman", serif;
@@ -25,7 +31,10 @@
 
 @layer base {
   body {
-    background-color: var(--color-background);
+    background:
+      radial-gradient(1200px 800px at 100% -10%, #9edcf0 0%, transparent 55%),
+      radial-gradient(1000px 700px at -10% 100%, #9dd6e9 0%, transparent 52%),
+      var(--color-background);
     color: var(--color-on-background);
     font-family: var(--font-inter);
     -webkit-font-smoothing: antialiased;

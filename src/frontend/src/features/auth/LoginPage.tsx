@@ -16,10 +16,27 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
+interface FrontendLoginUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+}
+
+interface LoginResponseShape {
+  access_token?: string;
+  user?: FrontendLoginUser;
+  message?: string;
+  user_id?: string;
+  role?: string;
+  name?: string;
+}
+
 export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [serverError, setServerError] = useState('');
+  const isMockMode = import.meta.env.VITE_USE_MOCK === 'true';
 
   const { register, handleSubmit, formState: { errors, isSubmitting, isValid } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -29,22 +46,48 @@ export function LoginPage() {
   const onSubmit = async (data: FormData) => {
     setServerError('');
     try {
-      const res = await authApi.login(data);
-      const { access_token, user } = res.data;
-      login(access_token, user as Parameters<typeof login>[1]);
-      navigate(ROLE_HOME_ROUTE[user.role as UserRole], { replace: true });
+      const res = await authApi.login({ email: data.email, password: data.password });
+      const payload = res.data as LoginResponseShape;
+      const normalizedUser = payload.user ?? (
+        payload.user_id && payload.role && payload.name
+          ? {
+              id: payload.user_id,
+              role: payload.role as UserRole,
+              name: payload.name,
+              email: data.email,
+            }
+          : undefined
+      );
+
+      if (!normalizedUser) {
+        throw new Error('Unexpected login response from server.');
+      }
+
+      const token = payload.access_token
+        ?? `session_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+
+      login(token, normalizedUser as Parameters<typeof login>[1]);
+      navigate(ROLE_HOME_ROUTE[normalizedUser.role as UserRole], { replace: true });
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      const msg = (err as {
+        message?: string;
+        response?: { data?: { message?: string; detail?: string } };
+      })?.response?.data?.message
+        ?? (err as {
+          message?: string;
+          response?: { data?: { message?: string; detail?: string } };
+        })?.response?.data?.detail
+        ?? (err as { message?: string })?.message;
       setServerError(msg ?? 'Login failed. Please try again.');
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#faf8ff] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-transparent flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-[#2563eb] rounded-md mb-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-[#046E8F] rounded-md mb-4 shadow-[0_8px_20px_rgba(2,47,64,0.22)]">
             <span
               className="material-symbols-outlined text-white text-2xl"
               style={{ fontVariationSettings: "'FILL' 1" }}
@@ -52,12 +95,12 @@ export function LoginPage() {
               local_shipping
             </span>
           </div>
-          <h1 className="font-display text-4xl font-bold text-[#131b2e] tracking-tight">Freight Ledger</h1>
-          <p className="text-sm text-[#505f76] mt-2">Sign in to your logistics workspace</p>
+          <h1 className="font-display text-4xl font-bold text-[#183446] tracking-tight">SmartFM</h1>
+          <p className="text-sm text-[#4B7084] mt-2">Sign in to your logistics workspace</p>
         </div>
 
         {/* Card */}
-        <div className="bg-[#ffffff] rounded-md border border-[#c3c6d7] shadow-[0_1px_0_rgba(32,27,22,0.08)] p-8">
+        <div className="bg-[#ffffff] rounded-md border border-[#B7D9E5] shadow-[0_1px_0_rgba(32,27,22,0.08)] p-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <Input
               id="email"
@@ -95,26 +138,27 @@ export function LoginPage() {
             </Button>
           </form>
 
-          {/* Demo accounts */}
-          <div className="mt-6 pt-6 border-t border-[#c3c6d7]">
-            <p className="text-xs text-center text-[#737686] mb-3 font-semibold uppercase tracking-wide">
-              Demo Accounts (password: password)
-            </p>
-            <div className="grid grid-cols-3 gap-2 text-center text-xs text-[#505f76]">
-              <div className="bg-[#f2f3ff] rounded-md p-2">
-                <p className="font-semibold text-[#131b2e]">Customer</p>
-                <p>customer@demo.com</p>
-              </div>
-              <div className="bg-[#f2f3ff] rounded-md p-2">
-                <p className="font-semibold text-[#131b2e]">Staff</p>
-                <p>staff@demo.com</p>
-              </div>
-              <div className="bg-[#f2f3ff] rounded-md p-2">
-                <p className="font-semibold text-[#131b2e]">Driver</p>
-                <p>driver@demo.com</p>
+          {isMockMode && (
+            <div className="mt-6 pt-6 border-t border-[#B7D9E5]">
+              <p className="text-xs text-center text-[#6A95A7] mb-3 font-semibold uppercase tracking-wide">
+                Demo Accounts (password: password)
+              </p>
+              <div className="grid grid-cols-3 gap-2 text-center text-xs text-[#4B7084]">
+                <div className="bg-[#E4F5FB] rounded-md p-2">
+                  <p className="font-semibold text-[#183446]">Customer</p>
+                  <p>customer@demo.com</p>
+                </div>
+                <div className="bg-[#E4F5FB] rounded-md p-2">
+                  <p className="font-semibold text-[#183446]">Staff</p>
+                  <p>staff@demo.com</p>
+                </div>
+                <div className="bg-[#E4F5FB] rounded-md p-2">
+                  <p className="font-semibold text-[#183446]">Driver</p>
+                  <p>driver@demo.com</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

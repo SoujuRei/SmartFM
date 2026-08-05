@@ -33,10 +33,10 @@ export function CustomerDashboardPage() {
       {/* Header */}
       <div className="flex items-end justify-between">
         <div>
-          <h2 className="font-display text-3xl font-bold text-[#131b2e] tracking-tight">
+          <h2 className="font-display text-3xl font-bold text-[#183446] tracking-tight">
             Welcome back, {loggedInUser?.name.split(' ')[0]}!
           </h2>
-          <p className="text-sm text-[#505f76] mt-1">Review orders, payment state, and shipment tracking links.</p>
+          <p className="text-sm text-[#4B7084] mt-1">Review orders, payment state, and shipment tracking links.</p>
         </div>
         <Link to="/customer/new-order">
           <Button>
@@ -48,13 +48,13 @@ export function CustomerDashboardPage() {
 
       {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <MetricCard icon="inventory_2" iconBg="bg-[#e2e7ff]" iconColor="text-[#131b2e]"
+        <MetricCard icon="inventory_2" iconBg="bg-[#D0EDF7]" iconColor="text-[#183446]"
           label="Total Orders" value={totalOrders} />
-        <MetricCard icon="local_shipping" iconBg="bg-[#e2e7ff]" iconColor="text-[#505f76]"
+        <MetricCard icon="local_shipping" iconBg="bg-[#D0EDF7]" iconColor="text-[#4B7084]"
           label="Active Shipments" value={activeOrders} />
-        <MetricCard icon="check_circle" iconBg="bg-[#e2e7ff]" iconColor="text-[#059669]"
+        <MetricCard icon="check_circle" iconBg="bg-[#D0EDF7]" iconColor="text-[#059669]"
           label="Delivered" value={deliveredOrders} />
-        <MetricCard icon="payment" iconBg="bg-[#e2e7ff]" iconColor="text-[#004ac6]"
+        <MetricCard icon="payment" iconBg="bg-[#D0EDF7]" iconColor="text-[#022F40]"
           label="Pending" value={pendingPayment} highlight={pendingPayment > 0} />
       </div>
 
@@ -63,7 +63,7 @@ export function CustomerDashboardPage() {
         <CardHeader
           title="My Orders"
           action={
-            <Link to="/customer/new-order" className="text-xs font-semibold text-[#1d4ed8] hover:text-[#004ac6]">
+            <Link to="/customer/new-order" className="text-xs font-semibold text-[#046E8F] hover:text-[#022F40]">
               + New Order
             </Link>
           }
@@ -81,9 +81,9 @@ export function CustomerDashboardPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-[#f2f3ff] border-b border-[#c3c6d7]">
+                <tr className="bg-[#E4F5FB] border-b border-[#B7D9E5]">
                   {['Order ID', 'Route', 'Cargo', 'Dimensions', 'Payment', 'Status', 'Amount', 'Actions'].map(h => (
-                    <th key={h} className="px-4 py-3 text-[11px] font-semibold text-[#505f76] uppercase tracking-wider">
+                    <th key={h} className="px-4 py-3 text-[11px] font-semibold text-[#4B7084] uppercase tracking-wider">
                       {h}
                     </th>
                   ))}
@@ -91,31 +91,31 @@ export function CustomerDashboardPage() {
               </thead>
               <tbody>
                 {orders.map(order => (
-                  <tr key={order.id} className="border-b border-[#e2e7ff] hover:bg-[#faf8ff] transition-colors">
+                  <tr key={order.id} className="border-b border-[#D0EDF7] hover:bg-[#F1F9FC] transition-colors">
                     <td className="px-4 py-3">
-                      <span className="font-mono text-xs font-medium text-[#131b2e] bg-[#f2f3ff] px-2 py-1 rounded-sm">
+                      <span className="font-mono text-xs font-medium text-[#183446] bg-[#E4F5FB] px-2 py-1 rounded-sm">
                         {order.id.toUpperCase()}
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="text-xs text-[#131b2e]">
+                      <div className="text-xs text-[#183446]">
                         <p className="font-medium">{order.origin}</p>
-                        <p className="text-[#505f76]">to {order.destination}</p>
+                        <p className="text-[#4B7084]">to {order.destination}</p>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-xs text-[#505f76]">
+                    <td className="px-4 py-3 text-xs text-[#4B7084]">
                       {order.cargoItems.length} item(s) · {order.totalWeightKg}kg
                     </td>
-                    <td className="px-4 py-3 text-xs text-[#505f76]">
+                    <td className="px-4 py-3 text-xs text-[#4B7084]">
                       {order.cargoItems.map(item => `${item.dimensions.lengthCm}x${item.dimensions.widthCm}x${item.dimensions.heightCm}cm`).join(', ')}
                     </td>
-                    <td className="px-4 py-3 text-xs font-semibold text-[#131b2e]">
+                    <td className="px-4 py-3 text-xs font-semibold text-[#183446]">
                       {order.isPaid ? 'Paid' : 'Unpaid'}
                     </td>
                     <td className="px-4 py-3">
                       <StatusBadge type="order" status={order.status as OrderStatusType} />
                     </td>
-                    <td className="px-4 py-3 text-sm font-semibold text-[#131b2e]">
+                    <td className="px-4 py-3 text-sm font-semibold text-[#183446]">
                       {formatCurrency(order.totalAmount)}
                     </td>
                     <td className="px-4 py-3">
@@ -172,13 +172,13 @@ function MetricCard({
   return (
     <div className={[
       'bg-[#ffffff] rounded-md border p-6 shadow-[0_1px_0_rgba(32,27,22,0.08)] relative overflow-hidden group',
-      highlight ? 'border-[#2563eb]' : 'border-[#c3c6d7]',
+      highlight ? 'border-[#0090C1]' : 'border-[#B7D9E5]',
     ].join(' ')}>
       <div className={`w-10 h-10 ${iconBg} rounded-md flex items-center justify-center mb-4`}>
         <span className={`material-symbols-outlined ${iconColor} text-xl`}>{icon}</span>
       </div>
-      <p className="text-xs text-[#505f76] mb-1">{label}</p>
-      <p className="font-mono text-2xl font-bold text-[#131b2e]">{value}</p>
+      <p className="text-xs text-[#4B7084] mb-1">{label}</p>
+      <p className="font-mono text-2xl font-bold text-[#183446]">{value}</p>
     </div>
   );
 }

@@ -10,7 +10,7 @@ const sizeClasses = { sm: 'h-4 w-4', md: 'h-8 w-8', lg: 'h-12 w-12' };
 export function Spinner({ size = 'md', className = '' }: SpinnerProps) {
   return (
     <svg
-      className={['animate-spin text-[#2563eb]', sizeClasses[size], className].join(' ')}
+      className={['animate-spin text-[#0090C1]', sizeClasses[size], className].join(' ')}
       viewBox="0 0 24 24"
       fill="none"
     >
@@ -22,10 +22,10 @@ export function Spinner({ size = 'md', className = '' }: SpinnerProps) {
 
 export function FullPageSpinner() {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-[#faf8ff]">
+    <div className="fixed inset-0 flex items-center justify-center bg-[#F1F9FC]">
       <div className="flex flex-col items-center gap-3">
         <Spinner size="lg" />
-        <p className="text-sm text-[#505f76]">Loading...</p>
+        <p className="text-sm text-[#4B7084]">Loading...</p>
       </div>
     </div>
   );

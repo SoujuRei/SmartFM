@@ -7,9 +7,9 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<string, string> = {
-  primary: 'bg-[#2563eb] hover:bg-[#1d4ed8] text-[#ffffff] shadow-sm',
-  secondary: 'bg-[#ffffff] border border-[#c3c6d7] text-[#131b2e] hover:bg-[#f2f3ff]',
-  ghost: 'bg-transparent text-[#2563eb] hover:bg-[#f2f3ff]',
+  primary: 'bg-[#0090C1] hover:bg-[#046E8F] text-[#ffffff] shadow-sm',
+  secondary: 'bg-[#ffffff] border border-[#B7D9E5] text-[#183446] hover:bg-[#E4F5FB]',
+  ghost: 'bg-transparent text-[#0090C1] hover:bg-[#E4F5FB]',
   danger: 'bg-[#ba1a1a] hover:bg-[#93000a] text-white shadow-sm',
 };
 
@@ -35,7 +35,7 @@ export function Button({
       disabled={isDisabled}
       className={[
         'inline-flex items-center justify-center gap-2 rounded-md font-semibold',
-        'transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/45 focus:ring-offset-2 focus:ring-offset-[#faf8ff]',
+        'transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#0090C1]/45 focus:ring-offset-2 focus:ring-offset-[#F1F9FC]',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         variantClasses[variant],
         sizeClasses[size],

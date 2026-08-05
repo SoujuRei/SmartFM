@@ -55,15 +55,15 @@ export interface StatusMeta {
 export const ORDER_STATUS_META: Record<OrderStatus, StatusMeta> = {
   [OrderStatus.PENDING]: {
     label: 'Pending',
-    className: 'border-[#9a5a16] text-[#004ac6]',
+    className: 'border-[#9a5a16] text-[#022F40]',
   },
   [OrderStatus.PROCESSING]: {
     label: 'Processing',
-    className: 'border-[#56504a] text-[#505f76]',
+    className: 'border-[#046E8F] text-[#4B7084]',
   },
   [OrderStatus.DISPATCHED]: {
     label: 'Dispatched',
-    className: 'border-[#2563eb] text-[#213246]',
+    className: 'border-[#0090C1] text-[#022F40]',
   },
   [OrderStatus.DELIVERED]: {
     label: 'Delivered',
@@ -79,11 +79,11 @@ export const ORDER_STATUS_META: Record<OrderStatus, StatusMeta> = {
 export const SHIPMENT_STATUS_META: Record<ShipmentStatus, StatusMeta> = {
   [ShipmentStatus.ASSIGNED]: {
     label: 'Assigned',
-    className: 'border-[#7e22ce] text-[#43382b]',
+    className: 'border-[#38AECC] text-[#022F40]',
   },
   [ShipmentStatus.IN_TRANSIT]: {
     label: 'In Transit',
-    className: 'border-[#2563eb] text-[#213246]',
+    className: 'border-[#0090C1] text-[#022F40]',
   },
   [ShipmentStatus.DELIVERED]: {
     label: 'Delivered',

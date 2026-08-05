@@ -19,8 +19,8 @@ export function CustomerTrackingPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-3xl font-bold text-[#131b2e]">Tracking</h2>
-        <p className="text-sm text-[#505f76]">Open a dispatched order to view its live tracking timeline.</p>
+        <h2 className="font-display text-3xl font-bold text-[#183446]">Tracking</h2>
+        <p className="text-sm text-[#4B7084]">Open a dispatched order to view its live tracking timeline.</p>
       </div>
 
       <Card padding={false}>
@@ -33,14 +33,14 @@ export function CustomerTrackingPage() {
           ) : (
             <ul className="space-y-3">
               {trackable.map(order => (
-                <li key={order.id} className="rounded-md border border-[#c3c6d7] bg-[#ffffff] p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <li key={order.id} className="rounded-md border border-[#B7D9E5] bg-[#ffffff] p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div className="space-y-1">
                     <div className="flex items-center gap-3 flex-wrap">
-                      <span className="font-mono text-xs font-semibold text-[#131b2e]">{order.id.toUpperCase()}</span>
+                      <span className="font-mono text-xs font-semibold text-[#183446]">{order.id.toUpperCase()}</span>
                       <StatusBadge type="order" status={order.status} />
                     </div>
-                    <p className="text-sm font-semibold text-[#131b2e]">{order.origin} to {order.destination}</p>
-                    <p className="text-xs text-[#505f76]">{order.totalWeightKg}kg · {order.isPaid ? 'Paid' : 'Unpaid'}</p>
+                    <p className="text-sm font-semibold text-[#183446]">{order.origin} to {order.destination}</p>
+                    <p className="text-xs text-[#4B7084]">{order.totalWeightKg}kg · {order.isPaid ? 'Paid' : 'Unpaid'}</p>
                   </div>
                   <Link to={`/customer/orders/${order.id}/tracking`}>
                     <Button size="sm" variant="secondary">Open Timeline</Button>

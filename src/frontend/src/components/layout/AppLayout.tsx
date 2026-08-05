@@ -45,12 +45,12 @@ export function AppLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-[#faf8ff] font-inter">
+    <div className="min-h-screen bg-transparent font-inter">
       {/* ── Sidebar ────────────────────────────────────────── */}
-      <aside className="fixed left-0 top-0 h-full w-[280px] bg-[#ffffff] border-r border-[#262f3d] flex flex-col py-6 z-40">
+      <aside className="fixed left-0 top-0 h-full w-[280px] bg-[#183446] border-r border-[#022F40] flex flex-col py-6 z-40 shadow-[8px_0_24px_rgba(2,47,64,0.25)]">
         {/* Logo */}
         <div className="px-6 mb-8 flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#2563eb] rounded-md flex items-center justify-center">
+          <div className="w-10 h-10 bg-[#0090C1] rounded-md flex items-center justify-center">
             <span
               className="material-symbols-outlined text-white text-xl"
               style={{ fontVariationSettings: "'FILL' 1" }}
@@ -59,8 +59,8 @@ export function AppLayout() {
             </span>
           </div>
           <div>
-            <h1 className="font-display text-lg font-bold text-[#ffffff] leading-tight">Freight Ledger</h1>
-            <p className="text-[11px] text-[#b8ad9d]">Logistics Management</p>
+            <h1 className="font-display text-lg font-bold text-[#ffffff] leading-tight">SmartFM</h1>
+            <p className="text-[11px] text-[#A8D1DF]">Logistics Management</p>
           </div>
         </div>
 
@@ -75,8 +75,8 @@ export function AppLayout() {
                 [
                   'flex items-center gap-3 px-4 py-3 rounded-md text-sm font-semibold transition-all duration-150',
                   isActive
-                    ? 'bg-[#faf8ff] text-[#131b2e]'
-                    : 'text-[#505f76] hover:bg-[#f2f3ff] hover:text-[#ffffff]',
+                    ? 'bg-[#38AECC] text-[#022F40]'
+                    : 'text-[#D2EEF7] hover:bg-[#046E8F] hover:text-[#ffffff]',
                 ].join(' ')
               }
             >
@@ -92,21 +92,21 @@ export function AppLayout() {
         </nav>
 
         {/* User + Logout */}
-        <div className="mt-auto px-4 pt-4 border-t border-[#303948] mx-4 space-y-2">
+        <div className="mt-auto px-4 pt-4 border-t border-[#046E8F] mx-4 space-y-2">
           {loggedInUser && (
-            <div className="px-4 py-3 rounded-md bg-[#f2f3ff] flex items-center gap-3">
-              <div className="w-8 h-8 rounded-md bg-[#2563eb] flex items-center justify-center text-[#ffffff] text-sm font-bold">
+            <div className="px-4 py-3 rounded-md bg-[#046E8F] flex items-center gap-3">
+              <div className="w-8 h-8 rounded-md bg-[#0090C1] flex items-center justify-center text-[#ffffff] text-sm font-bold">
                 {loggedInUser.name.charAt(0)}
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-semibold text-[#ffffff] truncate">{loggedInUser.name}</p>
-                <p className="font-mono text-[10px] text-[#b8ad9d] truncate">{loggedInUser.role}</p>
+                <p className="font-mono text-[10px] text-[#BEE5F2] truncate">{loggedInUser.role}</p>
               </div>
             </div>
           )}
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-sm font-semibold text-[#ba1a1a] hover:bg-[#ffdad6] transition-colors focus:outline-none focus:ring-2 focus:ring-[#2563eb]/60"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-sm font-semibold text-[#ba1a1a] hover:bg-[#ffdad6] transition-colors focus:outline-none focus:ring-2 focus:ring-[#0090C1]/60"
           >
             <span className="material-symbols-outlined text-xl">logout</span>
             Logout
@@ -115,19 +115,19 @@ export function AppLayout() {
       </aside>
 
       {/* ── Top Bar ────────────────────────────────────────── */}
-      <header className="fixed top-0 right-0 w-[calc(100%-280px)] h-14 bg-[#faf8ff] border-b border-[#c3c6d7] flex items-center justify-between px-8 z-30">
+      <header className="fixed top-0 right-0 w-[calc(100%-280px)] h-14 bg-[#ECF8FC]/95 backdrop-blur border-b border-[#A8D1DF] flex items-center justify-between px-8 z-30">
         <div className="relative hidden sm:block">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#737686] text-lg">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#6A95A7] text-lg">
             search
           </span>
           <input
             type="text"
             placeholder="Search orders, shipments…"
-            className="pl-10 pr-4 py-1.5 bg-[#ffffff] border border-[#c3c6d7] rounded-md text-sm text-[#131b2e] placeholder:text-[#737686] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/30 focus:border-[#2563eb] w-64 transition-all"
+            className="pl-10 pr-4 py-1.5 bg-[#ffffff] border border-[#B7D9E5] rounded-md text-sm text-[#183446] placeholder:text-[#6A95A7] focus:outline-none focus:ring-2 focus:ring-[#0090C1]/30 focus:border-[#0090C1] w-64 transition-all"
           />
         </div>
         <div className="flex items-center gap-2 ml-auto">
-          <button className="text-[#505f76] hover:bg-[#f2f3ff] rounded-md p-2 transition-colors relative">
+          <button className="text-[#4B7084] hover:bg-[#E4F5FB] rounded-md p-2 transition-colors relative">
             <span className="material-symbols-outlined">notifications</span>
           </button>
         </div>

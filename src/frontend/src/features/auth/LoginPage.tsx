@@ -36,6 +36,7 @@ export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [serverError, setServerError] = useState('');
+  const isMockMode = import.meta.env.VITE_USE_MOCK === 'true';
 
   const { register, handleSubmit, formState: { errors, isSubmitting, isValid } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -137,26 +138,27 @@ export function LoginPage() {
             </Button>
           </form>
 
-          {/* Demo accounts */}
-          <div className="mt-6 pt-6 border-t border-[#B7D9E5]">
-            <p className="text-xs text-center text-[#6A95A7] mb-3 font-semibold uppercase tracking-wide">
-              Demo Accounts (password: password)
-            </p>
-            <div className="grid grid-cols-3 gap-2 text-center text-xs text-[#4B7084]">
-              <div className="bg-[#E4F5FB] rounded-md p-2">
-                <p className="font-semibold text-[#183446]">Customer</p>
-                <p>customer@demo.com</p>
-              </div>
-              <div className="bg-[#E4F5FB] rounded-md p-2">
-                <p className="font-semibold text-[#183446]">Staff</p>
-                <p>staff@demo.com</p>
-              </div>
-              <div className="bg-[#E4F5FB] rounded-md p-2">
-                <p className="font-semibold text-[#183446]">Driver</p>
-                <p>driver@demo.com</p>
+          {isMockMode && (
+            <div className="mt-6 pt-6 border-t border-[#B7D9E5]">
+              <p className="text-xs text-center text-[#6A95A7] mb-3 font-semibold uppercase tracking-wide">
+                Demo Accounts (password: password)
+              </p>
+              <div className="grid grid-cols-3 gap-2 text-center text-xs text-[#4B7084]">
+                <div className="bg-[#E4F5FB] rounded-md p-2">
+                  <p className="font-semibold text-[#183446]">Customer</p>
+                  <p>customer@demo.com</p>
+                </div>
+                <div className="bg-[#E4F5FB] rounded-md p-2">
+                  <p className="font-semibold text-[#183446]">Staff</p>
+                  <p>staff@demo.com</p>
+                </div>
+                <div className="bg-[#E4F5FB] rounded-md p-2">
+                  <p className="font-semibold text-[#183446]">Driver</p>
+                  <p>driver@demo.com</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
